@@ -248,6 +248,15 @@ body.wide .ocards{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
 .coln{width:22px;text-align:center;font-weight:750;color:var(--g);font-size:13px;flex:none}
 .mv{width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--g);font-size:12px;padding:0;flex:none}
 .mv[disabled]{opacity:.3;cursor:default}
+
+/* ---------- voice ---------- */
+.voice{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;margin:10px 0}
+.voice .mic{width:100%;font-size:16px;padding:13px}
+.voice .mic.on{background:#8C1D18;border-color:#8C1D18;color:#fff;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(140,29,24,.18)}}
+.heard{font-size:13px;color:var(--mute);margin-top:8px}
+.pending{border:2px solid var(--g);border-radius:12px;padding:10px 12px;margin-top:10px}
+.pending .num{font:750 28px ui-monospace,"Cascadia Mono",Consolas,monospace;color:var(--g)}
 </style>
 </head>
 <body class="phone">
@@ -457,7 +466,7 @@ window.PdfLite = (() => {
 <script>
 window.App = (() => {
 'use strict';
-const KEY = 'dushe-prototype-v3';
+const KEY = 'dushe-prototype-v4';
 const COLOURS = { blue: '#2F6FD0', yellow: '#F5D20A', red: '#D93025', orange: '#F28C28', green: '#2E9E4F', pink: '#F06FAA' };
 const DARK_TEXT = new Set(['yellow', 'orange', 'pink']);
 const CATS = ['cow', 'heifer', 'bull', 'ox'];
@@ -466,13 +475,13 @@ const CATS_PL = { cow: 'Cows', heifer: 'Heifers', bull: 'Bulls', ox: 'Oxen' };
 const GENDER_CATS = { male: ['bull', 'ox'], female: ['heifer', 'cow'] };
 const SAMPLE_BREEDS = ['Afrikaner', 'Bonsmara', 'Brahman', 'Cross-breed', 'Nguni', 'Sanga', 'Simbra', 'Simmentaler'];
 const DEVICES = ['Android tablet', 'Android phone', 'Farm laptop', 'iPhone'];
-const SOURCE = { scan: 'Scanned', typed: 'Typed', paper: 'From paper notes' };
+const SOURCE = { scan: 'Scanned', typed: 'Typed', paper: 'From paper notes', voice: 'Spoken (voice)' };
 const EV = { registered: 'Registered', sold: 'Sold', died: 'Died', gave_birth: 'Gave birth — now a cow', changed_to_ox: 'Changed to ox', owner_changed: 'Owner changed', edited: 'Edited', corrected: 'Corrected', note: 'Note' };
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const FORMATS = {
   xlsx: ['Excel', '.xlsx', 'Opens in Excel, and in free apps: Google Sheets, WPS Office, LibreOffice.'],
   pdf: ['PDF', '.pdf', 'For printing or sending. Opens on any phone or computer, and cannot be changed by mistake.'],
-  csv: ['CSV', '.csv', 'A plain list. Opens in any spreadsheet app and can be loaded into other systems.'],
+  csv: ['CSV', '.csv', 'A plain list. Opens in any spreadsheet app and can be loaded into other systems. Excel may drop a leading 0 from ear tags in a CSV — for Excel, use the Excel file.'],
 };
 const BACKUP_WAYS = {
   usb: ['USB flash drive / SD card', 'usb', ['Plug in the flash drive with a USB OTG adapter, or use the SD card.', 'Choose the drive in the save screen — the backup file is written there.', 'On the farm laptop: Backup & sync → Import backup → choose the file.']],
@@ -536,6 +545,7 @@ const ICONS = {
   bt: '<path d="M7 7l10 10-5 4V3l5 4L7 17"/>',
   share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
   copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 const textOn = (c) => (DARK_TEXT.has(c) ? '#111' : '#fff');
@@ -550,10 +560,16 @@ let S;
 const owner = (id) => S.owners.find((o) => o.id === id);
 const ownerOf = (a) => owner(a.ownerId) || { name: '—', colour: 'blue' };
 const ownerName = (id) => (owner(id) || {}).name || '—';
-const byTag = (t) => S.animals.find((a) => a.tag === t);
+// Ear tags have letters and numbers. Spaces, dashes and dots are ignored and letters are kept as capitals.
+// "NAM" printed on official (yellow) tags is the country mark, not part of the number.
+function normTag(t) { let x = String(t || '').toUpperCase().replace(/[\s.\-]/g, ''); if (/^NAM\d{8,9}$/.test(x)) x = x.slice(3); return x; }
+const officialTag = (t) => /^\d{8,9}$/.test(t);
+const byTag = (t) => S.animals.find((a) => a.tag === normTag(t));
 const animal = (id) => S.animals.find((a) => a.id === id);
 const session = (id) => S.sessions.find((x) => x.id === id);
-const openSession = () => S.sessions.find((s) => !s.endedAt);
+const openSessions = () => S.sessions.filter((s) => !s.endedAt);
+const scanFor = () => openSessions().filter((s) => (S.scanFor || []).includes(s.id)); // the open sessions ticked on the scan screen
+function tick(id, on) { const t = new Set(S.scanFor || []); if (on) t.add(id); else t.delete(id); S.scanFor = [...t]; }
 const sortTag = (a, b) => ownerName(a.ownerId).localeCompare(ownerName(b.ownerId)) || a.tag.localeCompare(b.tag);
 function totals(list) { const t = { cow: 0, heifer: 0, bull: 0, ox: 0, all: 0 }; for (const a of list) if (a.status === 'active') { t[a.category]++; t.all++; } return t; }
 const inGroup = (s, a) => !s.group || ((!s.group.owners || s.group.owners.includes(a.ownerId)) && (!s.group.cats || s.group.cats.includes(a.category)));
@@ -628,7 +644,7 @@ function seed() {
   const colours = Object.keys(COLOURS);
   const descs = ['White face', 'Brown with white patch', 'Black', 'Red-brown', 'Short horns', 'Speckled', 'Long horns', '', '', ''];
   const used = new Set(); const animals = []; const events = [];
-  const newTag = () => { let t; do { const len = r() < 0.6 ? 8 : 9; t = String(1 + Math.floor(r() * 9)); while (t.length < len) t += Math.floor(r() * 10); } while (used.has(t)); used.add(t); return t; };
+  const newTag = () => { let t; do { const len = r() < 0.6 ? 8 : 9; t = String(Math.floor(r() * 10)); while (t.length < len) t += Math.floor(r() * 10); } while (used.has(t)); used.add(t); return t; };
   for (const o of owners) {
     const n = (o.colour === 'blue' ? 22 : 10) + Math.floor(r() * 9);
     for (let i = 0; i < n; i++) {
@@ -672,10 +688,10 @@ function seed() {
   ].map(([at, device, action, details]) => ({ id: uid(), at, device, action, details }));
   return { farm: { name: 'Dushe The White Hacienda', number: '' }, owners, breeds: SAMPLE_BREEDS.slice(), animals, events, sessions: [dip, past, running], vaccinations, audit,
     exportCols: defaultCols(), exportFmt: 'xlsx', pending: scanned.length + 2, lastBackup: '2026-10-11T17:20:00.000Z', lastBackupWay: 'usb',
-    lastSync: '2026-09-28T12:05:00.000Z', online: false, device: 'Android tablet' };
+    lastSync: '2026-09-28T12:05:00.000Z', online: false, device: 'Android tablet', scanFor: [running.id] };
 }
 function load() {
-  try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); if (!S.exportCols) S.exportCols = defaultCols(); return; } } catch (e) {}
+  try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); if (!S.exportCols) S.exportCols = defaultCols(); if (!S.scanFor) S.scanFor = openSessions().map((x) => x.id); return; } } catch (e) {}
   S = seed(); save();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -683,14 +699,14 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e
 // ---------- business rules (policy as code) ----------
 class RuleError extends Error { constructor(id, text) { super(`${text} (${id})`); this.id = id; } }
 const RULES = {
-  'POL-01': ['An ear tag number has 8 or 9 digits', (tag) => /^\d{8,9}$/.test(tag)],
+  'POL-01': ['An ear tag has 2 to 15 letters and numbers, with at least one number', (tag) => /^[A-Z0-9]{2,15}$/.test(tag) && /\d/.test(tag)],
   'POL-02': ['This ear tag number is already registered', (tag) => !byTag(tag)],
   'POL-03': ['Choose the owner, breed, gender and category', (f) => f.ownerId && f.breed && f.gender && f.category],
   'POL-04': ['The category must match the gender', (f) => (GENDER_CATS[f.gender] || []).includes(f.category)],
   'POL-06': ['Only a heifer can be recorded as giving birth', (a) => a.category === 'heifer'],
   'POL-07': ['Only a bull can be changed to an ox', (a) => a.category === 'bull'],
   'POL-08': ['Only an active animal can be changed', (a) => a.status === 'active'],
-  'POL-11': ['Already vaccinated in this session', (x) => !S.vaccinations.some((v) => v.sessionId === x.s.id && v.animalId === x.a.id)],
+  'POL-11': ['Already done in this session', (x) => !S.vaccinations.some((v) => v.sessionId === x.s.id && v.animalId === x.a.id)],
   'POL-12': ['Enter the date and the name of the vaccine or treatment', (f) => f.date && f.vaccine.trim()],
   'POL-15': ['An owner needs a name and a tag colour', (f) => f.name.trim() && f.colour],
   'POL-16': ['Give a reason to correct a mistake', (x) => x.a.status !== 'active' && x.reason.trim()],
@@ -705,6 +721,7 @@ function log(action, details, counts = true) { S.audit.push({ id: uid(), at: now
 function addEvent(a, type, details, at) { S.events.push({ id: uid(), animalId: a.id, type, at: at || nowIso(), details: details || '' }); }
 const Act = {
   register(f) {
+    f.tag = normTag(f.tag);
     rule('POL-01', f.tag); rule('POL-02', f.tag); rule('POL-03', f); rule('POL-04', f); rule('POL-17', f);
     if (f.paper) rule('POL-19', f.date);
     const at = f.paper ? `${f.date}T12:00:00.000Z` : nowIso();
@@ -765,9 +782,8 @@ const Act = {
   addBreed(name) { rule('POL-18', name); const b = String(name).trim(); S.breeds.push(b); S.breeds.sort((x, y) => x.localeCompare(y)); log('breed.added', b); return b; },
   startSession(f) {
     rule('POL-12', f);
-    if (openSession()) throw new Error('A session is already running — end it first');
     const s = { id: uid(), type: f.type === 'treatment' ? 'treatment' : 'vaccination', date: f.date, vaccine: f.vaccine.trim(), dose: f.dose.trim(), reason: f.reason.trim(), group: f.group || null, startedAt: nowIso(), endedAt: null };
-    S.sessions.push(s); log('session.started', `${kindOf(s)[0]}: ${s.vaccine}${s.dose ? ', ' + s.dose : ''} — ${groupLabel(s)}`);
+    S.sessions.push(s); tick(s.id, true); log('session.started', `${kindOf(s)[0]}: ${s.vaccine}${s.dose ? ', ' + s.dose : ''} — ${groupLabel(s)}`);
     return s;
   },
   vaccinate(s, a, source, at) {
@@ -783,7 +799,12 @@ const Act = {
     log('session.paper', `${s.vaccine} — ${added.length} added from paper notes (vaccinated ${date}): ${added.join(', ')}`);
     return added.length;
   },
-  endSession(s) { s.endedAt = nowIso(); const p = progress(s); log('session.ended', `${s.vaccine} — ${p.done} of ${p.total} ${VERB(s)}`); },
+  reopen(s) {
+    if (!s.endedAt) return;
+    s.endedAt = null; (s.reopened = s.reopened || []).push(nowIso()); tick(s.id, true);
+    log('session.reopened', `${s.vaccine} — reopened (started ${s.date})`);
+  },
+  endSession(s) { s.endedAt = nowIso(); tick(s.id, false); const p = progress(s); log('session.ended', `${s.vaccine} — ${p.done} of ${p.total} ${VERB(s)}`); },
   backup(way) { S.lastBackup = nowIso(); S.lastBackupWay = way; log('backup', `Backed up — ${BACKUP_WAYS[way][0]} (pretend)`, false); },
   sync() {
     if (!S.online) throw new Error('No internet — sync when you are in town');
@@ -802,6 +823,7 @@ const Act = {
 
 // ---------- view state ----------
 const UI = { cf: { q: '', status: 'active', cat: 'all', owner: 'all', breed: 'all' }, of: { id: null, tab: 'cattle', cat: 'all', q: '', inactive: false },
+  voice: { on: false, pending: null, heard: '', unknown: [] },
   ex: null, nf: null, vn: null, paper: null, read: null, lastRead: null, result: null, typed: '', missOpen: false };
 let VIEW = 'phone';
 const wide = () => VIEW !== 'phone';
@@ -837,22 +859,74 @@ function sessionBanner(s) {
   const p = progress(s);
   return `<a class="banner" href="#/vacc/${s.id}">${kindOf(s)[0]} running: <b>${h(s.vaccine)}</b> — ${p.done} of ${p.total} done (${pct(p.done, p.total)}%)${bar(p.done, p.total)}<u>Continue ›</u></a>`;
 }
-function scanPanel(s) {
-  const r = UI.read; const res = UI.result;
-  return `<div>
+function scanForBlock() {
+  const open = openSessions(); if (!open.length) return '';
+  const on = new Set(S.scanFor || []);
+  return `<div class="card"><div class="card-h">Scanning for <small>tick one or more open sessions</small></div>
+    ${open.map((x) => { const p = progress(x); return `<label class="check"><input type="checkbox" ${on.has(x.id) ? 'checked' : ''} onchange="App.scanForToggle('${x.id}',this.checked)"><span class="grow"><b>${h(x.vaccine)}</b> <span class="badge">${kindOf(x)[0]}</span></span><span class="small muted">${p.done} of ${p.total}</span></label>`; }).join('')}
+    ${scanFor().length ? '' : '<div class="hint">Nothing ticked — a scanned tag opens the animal’s record.</div>'}</div>`;
+}
+function scanPanel() {
+  const r = UI.read; const res = UI.result; const ss = scanFor();
+  return `<div>${scanForBlock()}
     ${hasCam() ? `<div class="viewfinder"><div class="tagframe">ear tag</div><div class="scanline"></div><div class="vf-hint">Point the camera at the ear tag</div></div>
       <div class="proto">Prototype: these buttons pretend the camera read a tag. The camera reads the number and the tag's colour — the owner is always chosen by hand.</div>
       <div class="btnrow"><button class="btn" onclick="App.fakeRead('known')">Read a known tag</button><button class="btn" onclick="App.fakeRead('new')">Read a new tag</button></div>`
-    : '<div class="proto">On the desktop the ear tag is typed — there is no camera scanning.</div>'}
-    ${r ? `<div class="readcard"><div class="muted small">Read by the camera</div><div class="num mono">${h(r.tag)}</div><div class="small">Tag colour: ${swatch(r.colour)} ${cap(r.colour)}</div>
+    : '<div class="proto">On the desktop the ear tag is typed or spoken — there is no camera scanning.</div>'}
+    ${voiceBlock()}
+    ${r ? `<div class="readcard"><div class="muted small">Read by the camera</div><div class="num mono">${h(r.tag)}</div>${r.raw !== r.tag ? `<div class="small muted">The camera read “${h(r.raw)}” — NAM is the country mark on official tags, so it is left out.</div>` : ''}<div class="small">Tag colour: ${swatch(r.colour)} ${cap(r.colour)}</div>
       <div class="btnrow" style="margin-top:8px"><button class="btn pri" onclick="App.confirmRead()">Confirm</button><button class="btn" onclick="App.correctRead()">Correct it</button></div></div>` : ''}
     ${res ? `<div class="${res.kind}">${h(res.text)}</div>` : ''}
     <label class="lbl">${hasCam() ? 'Or type the ear tag number' : 'Ear tag number'}</label>
-    <div class="inrow"><input id="tagin" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(UI.typed)}" onkeydown="if(event.key==='Enter')App.lookup()"><button class="btn pri" onclick="App.lookup()">Find</button></div>
-    <div class="hint">${s ? `A known tag is marked ${VERB(s)}. A new tag is registered first.` : 'A known tag opens the animal’s record. A new tag asks for its details.'}
+    <div class="inrow"><input id="tagin" class="mono" autocapitalize="characters" autocomplete="off" maxlength="24" placeholder="Letters and numbers, e.g. 09051665" value="${h(UI.typed)}" onkeydown="if(event.key==='Enter')App.lookup()"><button class="btn pri" onclick="App.lookup()">Find</button></div>
+    <div class="hint">${ss.length ? `A known tag is recorded in the ticked session${ss.length > 1 ? 's' : ''}. A new tag is registered first.` : 'A known tag opens the animal’s record. A new tag asks for its details.'}
       <a class="linkbtn" href="#/new">Add a new animal without scanning</a></div>
   </div>`;
 }
+// ---------- voice entry: say the tag, hear it back, say "next" or "correct" ----------
+const SPOKEN_NUM = { zero: '0', oh: '0', o: '0', nought: '0', nil: '0', one: '1', won: '1', two: '2', to: '2', too: '2', three: '3', tree: '3', four: '4', for: '4',
+  five: '5', six: '6', seven: '7', eight: '8', ate: '8', nine: '9', niner: '9' };
+const NATO = { alpha: 'A', alfa: 'A', bravo: 'B', charlie: 'C', delta: 'D', echo: 'E', foxtrot: 'F', golf: 'G', hotel: 'H', india: 'I', juliet: 'J', juliett: 'J', kilo: 'K',
+  lima: 'L', mike: 'M', november: 'N', oscar: 'O', papa: 'P', quebec: 'Q', romeo: 'R', sierra: 'S', tango: 'T', uniform: 'U', victor: 'V', whiskey: 'W', whisky: 'W', xray: 'X', yankee: 'Y', zulu: 'Z' };
+const VOICE_CMD = { next: 'next', yes: 'next', okay: 'next', ok: 'next', correct: 'correct', wrong: 'correct', again: 'correct', no: 'correct', repeat: 'repeat', stop: 'stop' };
+// "zero nine zero five one six six five next" → { tag: '09051665', cmd: 'next' }; "double five" → 55; NATO letters → letters
+function parseSpoken(text) {
+  const words = String(text || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  let cmd = null;
+  while (words.length && VOICE_CMD[words[words.length - 1]]) { cmd = cmd || VOICE_CMD[words[words.length - 1]]; words.pop(); }
+  let tag = ''; let times = 1;
+  for (const w of words) {
+    if (w === 'double') { times = 2; continue; }
+    if (w === 'triple') { times = 3; continue; }
+    const piece = /^\d+$/.test(w) ? w : SPOKEN_NUM[w] !== undefined ? SPOKEN_NUM[w] : NATO[w] ? NATO[w] : w === 'nam' ? 'NAM' : w.length === 1 ? w.toUpperCase() : null;
+    if (piece === null) continue; // words like "tag" or "number" are ignored
+    tag += piece.length === 1 ? piece.repeat(times) : piece; times = 1;
+  }
+  return { tag: tag ? normTag(tag) : '', cmd };
+}
+const SR = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null;
+function speak(text) {
+  try { if (!window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text); u.lang = 'en-ZA'; u.rate = 1.05; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { /* no voice on this device */ }
+}
+const spell = (tag) => tag.split('').join(' ');
+const animalWords = (a) => `${a.breed} ${CAT[a.category].toLowerCase()}, ${ownerName(a.ownerId)}`;
+function voiceBlock() {
+  const V = UI.voice; const p = V.pending; const a = p && byTag(p.tag);
+  return `<div class="voice">
+    <button class="btn mic ${V.on ? 'on' : 'pri'}" onclick="App.voiceToggle()">${icon('mic')} ${V.on ? 'Listening — tap to stop' : 'Say the tag (voice)'}</button>
+    <div class="hint">Read the letters and numbers aloud. The app says it back; then say <b>“next”</b> to record it and move on, or <b>“correct”</b> to say it again. Saying “… next” in one go records it at once.</div>
+    ${V.heard ? `<div class="heard">Heard: “${h(V.heard)}”</div>` : ''}
+    ${p ? `<div class="pending"><div class="small muted">Ear tag heard</div><div class="num">${h(p.tag)}</div>
+      <div class="small">${a ? `${h(animalWords(a))}${a.status !== 'active' ? ` — ${a.status}` : ''}` : 'Not in the system — saying “next” keeps it for later'}</div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn pri" onclick="App.voiceSay('next')">Next ✓</button><button class="btn" onclick="App.voiceSay('correct')">Correct ✗</button></div></div>` : ''}
+    ${V.unknown.length ? `<div class="warnbox">Not in the system — check later: ${V.unknown.map((t) => `<a class="linkbtn" href="#/new/${h(t)}">${h(t)}</a>`).join(' ')}</div>` : ''}
+    <div class="proto">Prototype: real voice works in Chrome or Edge <b>with internet</b>. The real app listens offline (Vosk, English, about 40 MB). Pretend:
+      <button class="linkbtn" onclick="App.voicePretend('known')">say a known tag</button> · <button class="linkbtn" onclick="App.voicePretend('new')">say a new tag</button> ·
+      <button class="linkbtn" onclick="App.voiceSay('next')">say “next”</button> · <button class="linkbtn" onclick="App.voiceSay('correct')">say “correct”</button></div>
+  </div>`;
+}
+
 function vRow(v) {
   const a = animal(v.animalId); if (!a) return '';
   return `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span>${v.source === 'paper' ? `<span class="src">paper · ${v.at.slice(5, 10)}</span>` : `<span class="small muted">${fmtDT(v.at).slice(5)}</span>`}</a>`;
@@ -867,12 +941,12 @@ const ownerSelect = (id, val, onchange) => `<select id="${id}" ${onchange ? `onc
 // ---------- screens ----------
 const Screens = {
   home() {
-    const t = totals(S.animals); const s = openSession();
+    const t = totals(S.animals);
     return { title: 'Home', body: `
       <div class="farm"><div class="fname">${h(S.farm.name)}</div><div class="fnum">Farm number: ${S.farm.number ? h(S.farm.number) : '<i>not set</i>'}</div></div>
       <div class="status"><span class="pill ${S.online ? 'on' : 'off'}">${S.online ? 'Online' : 'Offline — no internet'}</span>
         <span class="pill">${S.pending} changes waiting to sync</span><span class="pill">Backup: ${ago(S.lastBackup)}</span></div>
-      ${s ? sessionBanner(s) : ''}
+      ${openSessions().map(sessionBanner).join('')}
       <div class="homebtns"><a class="bigscan" href="#/scan">${icon('scan')} ${hasCam() ? 'Scan ear tag' : 'Enter ear tag'}</a><a class="btn block" href="#/new">${icon('plus')} Add new animal</a></div>
       <div class="dash">
         <div class="card"><div class="card-h">Active cattle <span class="big" style="font-size:28px">${t.all}</span></div>
@@ -885,26 +959,25 @@ const Screens = {
   },
 
   scan() {
-    const s = openSession();
-    return { title: s ? `Scan — ${kindOf(s)[0].toLowerCase()}` : hasCam() ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
-      ${s ? `<div class="banner">${kindOf(s)[0]} session: <b>${h(s.vaccine)}</b> — known ear tags are marked ${VERB(s)}. <a href="#/vacc/${s.id}">Session progress ›</a></div>` : ''}
-      <div class="${wide() ? 'dash' : ''}">${scanPanel(s)}${s ? `<div>${lastEntered(s, 6)}</div>` : ''}</div>` };
+    const ss = scanFor();
+    return { title: ss.length === 1 ? `Scan — ${kindOf(ss[0])[0].toLowerCase()}` : ss.length > 1 ? `Scan — ${ss.length} sessions` : hasCam() ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
+      <div class="${wide() ? 'dash' : ''}">${scanPanel()}${ss.length ? `<div>${ss.map((x) => lastEntered(x, 4)).join('')}</div>` : ''}</div>` };
   },
 
   new([tag], q) {
-    const s = openSession();
+    const ss = scanFor();
     const key = (tag || '') + '|' + (q.get('owner') || '');
     if (!UI.nf || UI.nf.key !== key) {
       const read = UI.lastRead && UI.lastRead.tag === tag ? UI.lastRead : null;
-      UI.nf = blankNf({ key, tag: tag || '', fixedTag: !!tag, ownerId: owner(q.get('owner')) ? q.get('owner') : '', tagColour: read ? read.colour : '', vacc: !!(s && tag), source: read ? 'scan' : 'typed' });
+      UI.nf = blankNf({ key, tag: tag || '', fixedTag: !!tag, ownerId: owner(q.get('owner')) ? q.get('owner') : '', tagColour: read ? read.colour : '', vacc: !!(ss.length && tag), source: read ? 'scan' : 'typed' });
       if (UI.nf.ownerId && !UI.nf.tagColour) { UI.nf.tagColour = owner(UI.nf.ownerId).colour; UI.nf.colourAuto = true; }
     }
     const f = UI.nf; const o = owner(f.ownerId);
     const cancel = f.returnTo || (f.fixedTag ? '#/scan' : '#/home');
     return { title: f.fixedTag ? 'New animal' : 'Add new animal', back: cancel, body: `<div class="narrow">
       <div class="card">${f.fixedTag
-        ? `<div class="muted small">Ear tag</div><div class="readcard" style="margin:6px 0 4px;border-style:dashed"><div class="num mono">${h(f.tag)}</div></div><div class="small muted">This ear tag is not in the system yet. Enter the details.</div>`
-        : `<label class="lbl" style="margin-top:0">Ear tag number</label><input id="nftag" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(f.tag)}"><div class="hint">No scanning needed — type the number from the tag or from the paper notes.</div>`}</div>
+        ? `<div class="muted small">Ear tag</div><div class="readcard" style="margin:6px 0 4px;border-style:dashed"><div class="num mono">${h(f.tag)}</div></div><div class="small muted">This ear tag is not in the system yet. Enter the details. ${officialTag(f.tag) ? 'It has the official yellow-tag format (8 or 9 numbers).' : 'Not the official yellow-tag format (8 or 9 numbers) — fine for the farm’s own tags.'}</div>`
+        : `<label class="lbl" style="margin-top:0">Ear tag</label><input id="nftag" class="mono" autocapitalize="characters" autocomplete="off" maxlength="24" placeholder="Letters and numbers, e.g. 09051665" value="${h(f.tag)}"><div class="hint">No scanning needed — type the tag from the ear or from the paper notes. Spaces don't matter; "NAM" on official tags is left out.</div>`}</div>
       <label class="lbl">Owner</label>
       <div class="inrow">${o ? avatar(o, 44) : ''}${ownerSelect('nfowner', f.ownerId, "App.nf('ownerId',this.value)")}</div>
       <div class="hint">Tag colours are mixed, so the owner is chosen here — never from the tag colour.</div>
@@ -924,7 +997,7 @@ const Screens = {
       <textarea id="nfdesc" placeholder="e.g. white face, short horns">${h(f.description)}</textarea>
       <label class="switch"><span>Written on paper earlier — entered now</span><input type="checkbox" ${f.paper ? 'checked' : ''} onchange="App.nf('paper',this.checked)"></label>
       ${f.paper ? `<label class="lbl" style="margin-top:4px">Date it happened</label><input id="nfdate" type="date" value="${h(f.date)}">` : ''}
-      ${s && !f.returnTo ? `<label class="switch"><span>Mark ${VERB(s)} in the running session (${h(s.vaccine)})</span><input type="checkbox" ${f.vacc ? 'checked' : ''} onchange="App.nf('vacc',this.checked)"></label>` : ''}
+      ${ss.length && !f.returnTo ? `<label class="switch"><span>Also record it in the ticked session${ss.length > 1 ? 's' : ''} (${ss.map((x) => h(x.vaccine)).join(', ')})</span><input type="checkbox" ${f.vacc ? 'checked' : ''} onchange="App.nf('vacc',this.checked)"></label>` : ''}
       ${f.returnTo ? '<div class="proto">From a session’s paper notes — after saving you go back to the paper list to finish.</div>' : ''}
       ${f.err ? `<div class="err">${h(f.err)}</div>` : ''}
       <div class="btnrow" style="margin-top:16px"><a class="btn" href="${cancel}">Cancel</a><button class="btn pri" onclick="App.saveNew()">Save animal</button></div></div>` };
@@ -1010,13 +1083,13 @@ const Screens = {
     if (id === 'new') return Screens.vaccNew();
     if (id && sub === 'paper') return Screens.vaccPaper(id);
     if (id) return Screens.vaccSession(id);
-    const s = openSession();
     const past = S.sessions.filter((x) => x.endedAt).sort((a, b) => b.date.localeCompare(a.date));
     return { title: 'Vaccination & treatment', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
-      ${s ? sessionBanner(s) : `<a class="btn pri block" href="#/vacc/new" style="margin-bottom:12px">Start a vaccination session</a>`}
-      <div class="card"><div class="card-h">Past sessions</div>
+      <a class="btn pri block" href="#/vacc/new" style="margin-bottom:12px">${icon('plus')} Start a session</a>
+      ${openSessions().map(sessionBanner).join('')}
+      <div class="card"><div class="card-h">Ended sessions <small>can be reopened</small></div>
         ${past.length ? past.map((x) => { const p = progress(x); return `<a class="row" href="#/vacc/${x.id}"><span class="grow"><b>${h(x.vaccine)}</b> <span class="badge">${kindOf(x)[0]}</span><br><span class="small muted">${h(x.date)}${x.dose ? ' · ' + h(x.dose) : ''} · ${h(groupLabel(x))}</span></span><span class="small muted">${p.done} of ${p.total}</span><span class="chev">›</span></a>`; }).join('') : '<div class="empty">No sessions yet.</div>'}</div>
-      <div class="hint">A session is a vaccination or a treatment of a group (e.g. dipping, deworming). It can stay open over several days. Cattle done on paper are added from the session screen.</div></div>` };
+      <div class="hint">A session is a vaccination or a treatment of a group (e.g. dipping, deworming). Several sessions can be open at the same time, a session can stay open over several days, and an ended session can be reopened. Cattle done on paper are added from the session screen.</div></div>` };
   },
   vaccNew() {
     if (!UI.vn) UI.vn = { type: 'vaccination', date: today(), vaccine: '', dose: '', reason: '', mode: 'all', owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), err: '' };
@@ -1038,15 +1111,16 @@ const Screens = {
       <div class="hint"><b>${n}</b> active cattle in this session — progress is counted out of this number (e.g. 13 bulls out of 40).</div>
       ${v.err ? `<div class="err">${h(v.err)}</div>` : ''}
       <button class="btn pri block" style="margin-top:16px" onclick="App.startSession()">Start session</button>
-      <div class="hint">Then scan each animal. Known tags are marked ${KIND[v.type][1]}; new tags are registered first.</div></div>` };
+      <div class="hint">Then scan each animal. Known tags are marked ${KIND[v.type][1]}; new tags are registered first. Other open sessions stay open.</div></div>` };
   },
   vaccSession(id) {
     const s = session(id); if (!s) return { title: 'Not found', back: '#/vacc', body: '<div class="empty">Session not found.</div>' };
     const p = progress(s); const open = !s.endedAt;
+    if (open && VIEW === 'tablet' && !(S.scanFor || []).includes(id)) { tick(id, true); save(); } // scanning on this screen goes to this session
     const vs = S.vaccinations.filter((v) => v.sessionId === id);
     const day = daysBetween(s.date, today()) + 1;
     const V = VERB(s);
-    const summary = `<div class="card"><div class="muted small"><span class="badge">${kindOf(s)[0]}</span> Started ${h(s.date)} · ${open ? `running${day > 1 ? ` — day ${day}` : ''}` : 'ended ' + fmtDT(s.endedAt)}</div>
+    const summary = `<div class="card"><div class="muted small"><span class="badge">${kindOf(s)[0]}</span> Started ${h(s.date)} · ${open ? `running${day > 1 ? ` — day ${day}` : ''}` : 'ended ' + fmtDT(s.endedAt)}${(s.reopened || []).length ? ` · reopened ${fmtDT(s.reopened[s.reopened.length - 1])}` : ''}</div>
       <div style="font-size:19px;font-weight:750;margin:2px 0">${h(s.vaccine)}</div>
       <div class="small muted">${s.dose ? 'Dose: ' + h(s.dose) : 'No dose entered'}${s.reason ? ' · ' + h(s.reason) : ''}</div>
       <div class="small muted">In this session: ${h(groupLabel(s))}</div>
@@ -1060,17 +1134,18 @@ const Screens = {
       <div class="btnrow"><button class="btn sm" onclick="App.toggleMissing()">${UI.missOpen ? 'Hide list' : 'See list'}</button><button class="btn sm" onclick="App.printMissing('${id}')">${icon('print')} Print</button>
         <button class="btn sm" onclick="App.exportMissing('${id}','pdf')">${icon('pdf')} PDF</button><button class="btn sm" onclick="App.exportMissing('${id}','xlsx')">${icon('sheet')} Excel</button></div>
       ${UI.missOpen ? `<div style="margin-top:8px">${p.missing.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span></a>`).join('') || '<div class="empty">All done.</div>'}</div>` : ''}</div>`;
-    const acts = `${open && VIEW !== 'tablet' ? `<a class="bigscan" href="#/scan">${icon('scan')} ${hasCam() ? 'Scan next animal' : 'Enter next ear tag'}</a>` : ''}
+    const acts = `${open && VIEW !== 'tablet' ? `<a class="bigscan" href="#/scan" onclick="App.tickSession('${id}')">${icon('scan')} ${hasCam() ? 'Scan next animal' : 'Enter next ear tag'}</a>` : ''}
       <a class="btn block" href="#/vacc/${id}/paper" style="margin-bottom:12px">${icon('paper')} Add cattle from paper notes</a>`;
     const list = `<div class="card"><div class="card-h">${open ? 'Last entered' : 'Animals vaccinated'} <small>${vs.length}</small></div>${vs.slice().reverse().slice(0, open ? 8 : 400).map(vRow).join('') || '<div class="empty">Nothing entered yet.</div>'}</div>`;
-    const end = open ? `<button class="btn warn block" onclick="App.dlgEndSession('${id}')">End session</button>` : '';
+    const end = open ? `<button class="btn warn block" onclick="App.dlgEndSession('${id}')">End session</button>` : `<button class="btn block" onclick="App.dlgReopen('${id}')">Reopen session</button>`;
     const nam = `<div class="card"><div class="card-h">For NamLITS and the register <small>${vs.length} ear tags</small></div>
       <div class="small muted">Records of vaccinations and treatments must be kept by law. NamLITS online asks for the ear tag number of every animal done — copy them here and paste them there when you have internet.</div>
       <div class="btnrow" style="margin-top:10px"><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.copyTags('${id}')">${icon('copy')} Copy ear tags</button><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.saveTags('${id}')">Save list (.txt)</button></div>
       <div class="btnrow" style="margin-top:8px"><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.exportRecord('${id}','pdf')">${icon('pdf')} Record (PDF)</button><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.exportRecord('${id}','xlsx')">${icon('sheet')} Record (Excel)</button></div></div>`;
     let body;
-    if (VIEW === 'tablet' && open) body = `<div class="dash"><div>${scanPanel(s)}<div style="height:12px"></div>${acts}${list}</div><div>${summary}${cats}${miss}${nam}${owners}${end}</div></div>`;
+    if (VIEW === 'tablet' && open) body = `<div class="dash"><div>${scanPanel()}<div style="height:12px"></div>${acts}${list}</div><div>${summary}${cats}${miss}${nam}${owners}${end}</div></div>`;
     else if (wide()) body = `<div class="dash"><div>${summary}${acts}${cats}${owners}${end}</div><div>${miss}${nam}${list}</div></div>`;
+    else if (!open) body = summary + end + acts + cats + miss + nam + owners + list;
     else body = summary + acts + cats + miss + nam + owners + list + end;
     return { title: open ? 'Session running' : 'Session summary', back: '#/vacc', body };
   },
@@ -1083,8 +1158,8 @@ const Screens = {
       <div class="card"><div class="muted small">${h(s.date)} · ${s.endedAt ? 'ended' : 'running'}</div><b>${h(s.vaccine)}</b>
         <div class="small muted" style="margin-top:6px">For cattle ${VERB(s)} while the phone or tablet was off, flat or not there, and written on paper. Type their ear tag numbers here.</div></div>
       <label class="lbl">Date they were ${VERB(s)}</label><input id="pdate" type="date" value="${h(P.date)}" oninput="App.paperField('date',this.value)">
-      <label class="lbl">Ear tag numbers <span class="opt">— one per line, or with spaces between</span></label>
-      <textarea id="ptext" class="mono" style="min-height:130px" placeholder="e.g.&#10;12345678&#10;987654321" oninput="App.paperField('text',this.value)">${h(P.text)}</textarea>
+      <label class="lbl">Ear tags <span class="opt">— one per line (or separated by commas)</span></label>
+      <textarea id="ptext" class="mono" style="min-height:130px" autocapitalize="characters" placeholder="e.g.&#10;09051665&#10;NAM 0905 1666" oninput="App.paperField('text',this.value)">${h(P.text)}</textarea>
       <button class="btn block" style="margin-top:10px" onclick="App.paperCheck()">Check the numbers</button>
       ${P.checked ? `<div class="card" style="margin-top:12px"><div class="card-h">Checked <small>${ok} ready to add</small></div>${rows.map(paperRow).join('') || '<div class="empty">No numbers typed.</div>'}</div>
         <button class="btn pri block" ${ok ? '' : 'disabled'} onclick="App.paperSave()">Mark ${ok} as ${VERB(s)}</button>` : ''}
@@ -1177,7 +1252,7 @@ function ownerCattle(o, t) {
 }
 function ownerAbout(o, act, breeds) {
   const cols = byCount(countBy(act, 'tagColour'));
-  const s = openSession(); const sp = s && progress(s).owners[o.id];
+  const opens = openSessions();
   const last = S.sessions.filter((x) => x.endedAt).sort((a, b) => b.date.localeCompare(a.date))[0];
   const lastN = last ? S.vaccinations.filter((v) => v.sessionId === last.id && (animal(v.animalId) || {}).ownerId === o.id).length : 0;
   return `<div class="card"><div class="card-h">About</div>
@@ -1189,7 +1264,7 @@ function ownerAbout(o, act, breeds) {
     <div class="card"><div class="card-h">Tag colours in the ears <small>tags are mixed</small></div>
       <div class="chips">${cols.map(([c, n]) => `<span class="chip">${swatch(c)} ${cap(c)} <span class="n">${n}</span></span>`).join('') || '<span class="muted">—</span>'}</div></div>
     <div class="card"><div class="card-h">Vaccination & treatment</div>
-      ${sp && sp.total ? `<div class="small">Running: <b>${h(s.vaccine)}</b></div><div class="prow"><span class="pl">This owner</span>${bar(sp.done, sp.total)}<span class="pn"><b>${sp.done}</b> of ${sp.total}</span></div>` : ''}
+      ${opens.map((s) => { const sp = progress(s).owners[o.id]; return sp && sp.total ? `<div class="prow"><span class="pl">${h(s.vaccine)}</span>${bar(sp.done, sp.total)}<span class="pn"><b>${sp.done}</b> of ${sp.total}</span></div>` : ''; }).join('')}
       ${last ? `<div class="small muted">Last session: ${h(last.vaccine)} (${h(last.date)}) — ${lastN} of this owner's cattle</div>` : '<div class="small muted">No sessions yet.</div>'}</div>`;
 }
 function ownerActivity(o) {
@@ -1202,9 +1277,9 @@ function ownerActivity(o) {
     <ul class="tl">${items.map((x) => `<li><span class="dot ${x.k}"></span><div><div><a class="mono" href="#/animal/${x.id}"><b>${h((animal(x.id) || {}).tag)}</b></a> · ${h(x.title)}${x.text ? ' — ' + h(x.text) : ''}</div><div class="when">${when(x.at, x.d)}</div></div></li>`).join('') || '<li class="empty">Nothing yet.</li>'}</ul></div>`;
 }
 function cattleList() {
-  const f = UI.cf; const q = f.q.trim().toLowerCase();
+  const f = UI.cf; const q = f.q.trim().toLowerCase(); const tq = normTag(f.q);
   const list = S.animals.filter((a) => (f.status === 'all' || a.status === f.status) && (f.cat === 'all' || a.category === f.cat) && (f.owner === 'all' || a.ownerId === f.owner)
-    && (f.breed === 'all' || a.breed === f.breed) && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
+    && (f.breed === 'all' || a.breed === f.breed) && (!q || (tq && a.tag.includes(tq)) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
   if (!list.length) return '<div class="empty">No cattle match.</div>';
   if (wide()) return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:0;overflow:hidden"><table class="tbl">
     <tr><th>Ear tag</th><th>Owner</th><th>Breed</th><th>Gender</th><th>Category</th><th>Status</th><th>Description</th></tr>
@@ -1212,17 +1287,17 @@ function cattleList() {
   return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:4px 12px">${list.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour, 1)}<span class="grow"><span class="mono"><b>${h(a.tag)}</b></span><br><span class="small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span></span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('')}</div>`;
 }
 function ownerList() {
-  const f = UI.of; const q = f.q.trim().toLowerCase();
+  const f = UI.of; const q = f.q.trim().toLowerCase(); const tq = normTag(f.q);
   const list = S.animals.filter((a) => a.ownerId === f.id && (f.inactive || a.status === 'active') && (f.cat === 'all' || a.category === f.cat)
-    && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
+    && (!q || (tq && a.tag.includes(tq)) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
   return list.length ? list.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono"><b>${h(a.tag)}</b></span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)}${a.description ? ' · ' + h(a.description) : ''}</span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('') : '<div class="empty">No cattle match.</div>';
 }
 function exportList() { const e = UI.ex; return S.animals.filter((a) => e.owners.has(a.ownerId) && e.cats.has(a.category) && !e.xb.has(a.breed) && (e.inc || a.status === 'active')).sort(sortTag); }
 function exportRows(list) { const cols = S.exportCols.filter((c) => c.on).map((c) => COL[c.k]); return [cols.map((c) => c.label), ...list.map((a) => cols.map((c) => c.get(a)))]; }
-const parseTags = (text) => [...new Set(String(text || '').split(/[\s,;]+/).map((t) => t.trim()).filter(Boolean))];
+const parseTags = (text) => [...new Set(String(text || '').split(/[\n,;]+/).map(normTag).filter(Boolean))]; // one tag per line — tags can contain spaces
 function paperCheck(s, tags) {
   return tags.map((tag) => {
-    if (!/^\d{8,9}$/.test(tag)) return { tag, kind: 'bad', text: 'Not 8 or 9 digits — check the paper' };
+    if (!RULES['POL-01'][1](tag)) return { tag, kind: 'bad', text: 'Not a valid ear tag — check the paper' };
     const a = byTag(tag);
     if (!a) return { tag, kind: 'new', text: 'Not in the system yet' };
     if (a.status !== 'active') return { tag, a, kind: 'skip', text: `${a.status === 'dead' ? 'Dead' : 'Sold'} — skipped` };
@@ -1287,23 +1362,72 @@ const api = {
   fakeRead(kind) {
     let tag, colour;
     if (kind === 'known') { const act = S.animals.filter((a) => a.status === 'active'); const a = act[Math.floor(Math.random() * act.length)]; tag = a.tag; colour = a.tagColour; }
-    else { do { tag = String(1 + Math.floor(Math.random() * 9)); while (tag.length < 9) tag += Math.floor(Math.random() * 10); } while (byTag(tag)); const cs = Object.keys(COLOURS); colour = cs[Math.floor(Math.random() * cs.length)]; }
-    UI.read = { tag, colour }; UI.result = null; render();
+    else { do { tag = ''; while (tag.length < 8) tag += Math.floor(Math.random() * 10); } while (byTag(tag)); const cs = Object.keys(COLOURS); colour = cs[Math.floor(Math.random() * cs.length)]; }
+    const raw = kind === 'new' && Math.random() < 0.5 ? `NAM ${tag.slice(0, 4)} ${tag.slice(4)}` : tag;
+    UI.read = { raw, tag: normTag(raw), colour }; UI.result = null; render();
   },
   confirmRead() { const r = UI.read; UI.read = null; UI.lastRead = r; api.handleTag(r.tag, 'scan'); },
+  scanForToggle(id, on) { tick(id, on); save(); UI.result = null; render(); },
+  voiceToggle() {
+    const V = UI.voice;
+    if (V.on) { V.on = false; try { if (recog) recog.stop(); } catch (e) {} render(); return; }
+    const Rec = SR();
+    if (!Rec) { toast('This browser has no speech recognition — use Chrome or Edge, or the pretend buttons', 'warn'); return; }
+    recog = new Rec(); recog.lang = 'en-ZA'; recog.continuous = true; recog.interimResults = false;
+    recog.onresult = (e) => { const r = e.results[e.results.length - 1]; if (r && r[0]) api.voiceSay(r[0].transcript); };
+    recog.onerror = (e) => { if (e.error === 'network') toast('Voice needs internet in this prototype — the real app works offline', 'warn'); else if (e.error === 'not-allowed') toast('Allow the microphone to use voice', 'warn'); V.on = false; render(); };
+    recog.onend = () => { if (V.on) { try { recog.start(); } catch (e) { V.on = false; render(); } } };
+    try { recog.start(); V.on = true; speak('Listening'); } catch (e) { toast('Could not start the microphone', 'warn'); }
+    render();
+  },
+  voiceSay(text) { // everything heard (or pretended) comes through here
+    const V = UI.voice; const r = parseSpoken(text); V.heard = String(text);
+    if (r.tag) {
+      V.pending = { tag: r.tag };
+      const a = byTag(r.tag);
+      if (!r.cmd) speak(`${spell(r.tag)}. ${a ? animalWords(a) : 'Not in the system'}.`);
+    }
+    if (r.cmd === 'stop') { if (V.on) api.voiceToggle(); return; }
+    if (r.cmd === 'repeat' && V.pending) { speak(spell(V.pending.tag)); render(); return; }
+    if (r.cmd === 'correct') { V.pending = null; speak('Say it again'); render(); return; }
+    if (r.cmd === 'next') {
+      const p = V.pending; V.pending = null;
+      if (!p) { speak('Say the tag first'); render(); return; }
+      const a = byTag(p.tag);
+      if (!a) { if (!V.unknown.includes(p.tag)) V.unknown.push(p.tag); speak('Not in the system. Kept for later.'); render(); return; }
+      if (!scanFor().length) { speak('No session ticked. Opening the record.'); go(`#/animal/${a.id}`); return; }
+      api.handleTag(p.tag, 'voice');
+      const res = UI.result || {};
+      speak(res.kind === 'ok' ? 'Done' : /Already done/.test(res.text || '') ? 'Already done' : 'Recorded — check the screen');
+      return;
+    }
+    render();
+  },
+  voicePretend(kind) {
+    const words = (t) => t.split('').map((c) => (/\d/.test(c) ? ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][+c] : c)).join(' ');
+    if (kind === 'known') { const act = S.animals.filter((a) => a.status === 'active'); api.voiceSay(words(act[Math.floor(Math.random() * act.length)].tag)); return; }
+    let t; do { t = ''; while (t.length < 8) t += Math.floor(Math.random() * 10); } while (byTag(t));
+    api.voiceSay('nam ' + words(t));
+  },
+  _parseSpoken: parseSpoken,
+  tickSession(id) { tick(id, true); save(); },
   correctRead() { const r = UI.read; UI.read = null; render(); const i = $('#tagin'); i.value = r.tag; i.focus(); },
   lookup() { UI.lastRead = null; api.handleTag(($('#tagin').value || '').trim(), 'typed'); },
-  handleTag(tag, source) {
-    try { rule('POL-01', tag); } catch (e) { UI.result = { kind: 'err', text: e.message }; UI.typed = tag; render(); return; }
+  handleTag(raw, source) {
+    const tag = normTag(raw);
+    try { rule('POL-01', tag); } catch (e) { UI.result = { kind: 'err', text: e.message }; UI.typed = raw; render(); return; }
     UI.typed = '';
-    const a = byTag(tag); const s = openSession();
+    const a = byTag(tag); const ss = scanFor();
     if (!a) { UI.result = null; go(`#/new/${tag}`); return; }
-    if (s) {
-      try {
-        Act.vaccinate(s, a, source); const p = progress(s); const outside = !inGroup(s, a);
-        UI.result = { kind: outside ? 'warnbox' : 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${a.breed}, ${ownerName(a.ownerId)}) marked ${VERB(s)}${outside ? ' — note: it is not in the group chosen for this session' : ''} — ${p.done} of ${p.total} done` };
-      }
-      catch (e) { UI.result = { kind: 'warnbox', text: `${tag}: ${e.message}` }; }
+    if (ss.length) { // record it in every ticked session
+      let warn = false;
+      const parts = ss.map((s) => {
+        try {
+          Act.vaccinate(s, a, source); const p = progress(s); const outside = !inGroup(s, a); if (outside) warn = true;
+          return `${s.vaccine}: ${VERB(s)}${outside ? ' — note: not in the group chosen for this session' : ''} — ${p.done} of ${p.total} done`;
+        } catch (e) { warn = true; return `${s.vaccine}: ${e.message}`; }
+      });
+      UI.result = { kind: warn ? 'warnbox' : 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${a.breed}, ${ownerName(a.ownerId)}) — ${parts.join(' · ')}` };
       render(); return;
     }
     UI.result = null; go(`#/animal/${a.id}`);
@@ -1331,12 +1455,12 @@ const api = {
     nfCollect(); const f = UI.nf;
     if (f.addingBreed && f.newBreed.trim()) { try { f.breed = Act.addBreed(f.newBreed); f.addingBreed = false; } catch (e) { f.err = e.message; render(); return; } }
     try {
-      const a = Act.register(f); const s = openSession(); UI.nf = null; UI.lastRead = null;
+      const a = Act.register(f); const ss = scanFor(); UI.nf = null; UI.lastRead = null;
       if (f.returnTo) { toast(`Saved — ${a.tag}. Now mark it from the paper list.`); go(f.returnTo); return; }
-      if (s && f.vacc) {
-        Act.vaccinate(s, a, f.paper ? 'paper' : f.source, f.paper ? `${f.date}T12:00:00.000Z` : null); const p = progress(s);
-        UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked ${VERB(s)} — ${p.done} of ${p.total} done` };
-        go(VIEW === 'tablet' ? `#/vacc/${s.id}` : '#/scan'); return;
+      if (ss.length && f.vacc) {
+        for (const s of ss) Act.vaccinate(s, a, f.paper ? 'paper' : f.source, f.paper ? `${f.date}T12:00:00.000Z` : null);
+        UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked ${[...new Set(ss.map(VERB))].join(' and ')} — ${ss.map((s) => { const p = progress(s); return `${s.vaccine}: ${p.done} of ${p.total} done`; }).join(' · ')}` };
+        go(VIEW === 'tablet' ? `#/vacc/${ss[0].id}` : '#/scan'); return;
       }
       toast(`Saved — ${a.tag}`); go(`#/animal/${a.id}`);
     } catch (e) { f.err = e.message; render(); }
@@ -1459,7 +1583,13 @@ const api = {
       <div class="hint">Cattle written on paper can still be added after the session ends.</div>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doEndSession('${id}')">End session</button></div>`);
   },
-  doEndSession(id) { Act.endSession(session(id)); close(); UI.result = null; toast('Session ended'); render(); },
+  doEndSession(id) { Act.endSession(session(id)); close(); UI.result = null; toast('Session ended — it can be reopened later'); render(); },
+  dlgReopen(id) {
+    const s = session(id);
+    modal(`<h3>Reopen the session?</h3><div class="small muted">${h(s.vaccine)} (started ${h(s.date)}) becomes open again: more cattle can be scanned or added from paper. It is ticked on the scan screen. You can end it again later.</div>
+      <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doReopen('${id}')">Reopen</button></div>`);
+  },
+  doReopen(id) { Act.reopen(session(id)); close(); toast('Session reopened'); render(); },
   toggleMissing() { UI.missOpen = !UI.missOpen; render(); },
   printMissing(id) { const s = session(id); const p = progress(s); printTable(`${S.farm.name} — not ${VERB(s)} yet`, `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not ${VERB(s)} · printed ${fmtDT(nowIso())}`, missingRows(s)); },
   exportMissing(id, fmt) {
@@ -1591,7 +1721,11 @@ const api = {
 // ---------- start ----------
 load();
 try { const v = new URLSearchParams(location.search).get('view') || localStorage.getItem(KEY + '-view'); VIEW = ['phone', 'tablet', 'desktop'].includes(v) ? v : 'phone'; } catch (e) { VIEW = 'phone'; }
-window.addEventListener('hashchange', () => { UI.read = null; if (!/^#\/(scan|vacc\/)/.test(location.hash)) UI.result = null; render(); });
+window.addEventListener('hashchange', () => {
+  UI.read = null;
+  if (!/^#\/(scan|vacc\/)/.test(location.hash)) { UI.result = null; if (UI.voice.on) { UI.voice.on = false; try { if (recog) recog.stop(); } catch (e) {} } }
+  render();
+});
 render();
 return api;
 })();
