@@ -457,7 +457,7 @@ window.PdfLite = (() => {
 <script>
 window.App = (() => {
 'use strict';
-const KEY = 'dushe-prototype-v2';
+const KEY = 'dushe-prototype-v3';
 const COLOURS = { blue: '#2F6FD0', yellow: '#F5D20A', red: '#D93025', orange: '#F28C28', green: '#2E9E4F', pink: '#F06FAA' };
 const DARK_TEXT = new Set(['yellow', 'orange', 'pink']);
 const CATS = ['cow', 'heifer', 'bull', 'ox'];
@@ -475,11 +475,16 @@ const FORMATS = {
   csv: ['CSV', '.csv', 'A plain list. Opens in any spreadsheet app and can be loaded into other systems.'],
 };
 const BACKUP_WAYS = {
-  wifi: ['Local Wi-Fi to the farm laptop', 'wifi', ['Switch on the travel router (or a phone hotspot) — no internet is needed.', 'On the farm laptop open Backup & sync — it shows a QR code.', 'Scan that QR code here. Changes go both ways, so the laptop and this device end up the same.']],
   usb: ['USB flash drive / SD card', 'usb', ['Plug in the flash drive with a USB OTG adapter, or use the SD card.', 'Choose the drive in the save screen — the backup file is written there.', 'On the farm laptop: Backup & sync → Import backup → choose the file.']],
-  cable: ['USB cable to the laptop', 'cable', ['Connect this device to the laptop with its charging cable.', 'On the device choose "File transfer". The backup is in Documents → Dushe backups.', 'On the farm laptop: Backup & sync → Import backup → choose the file on the device.']],
+  qs: ['Quick Share to the laptop (to test)', 'share', ['Once, in town: install Google\u2019s Quick Share app on the farm laptop and set it up.', 'Here: Share → Quick Share → choose the laptop. Keep Wi-Fi and Bluetooth on, on both.', 'On the laptop: Backup & sync → Import backup. Google does not say it works without internet — test it on the farm first.']],
   bt: ['Bluetooth (Android)', 'bt', ['On the farm laptop: Bluetooth settings → Send or receive files → Receive files.', 'Here: Send → Bluetooth → choose the laptop.', 'On the laptop: Backup & sync → Import backup. Slow for big backups with photos.']],
+  wifi: ['Local Wi-Fi to the farm laptop', 'wifi', ['Switch on the travel router (or a phone hotspot) — no internet is needed.', 'On the farm laptop open Backup & sync — it shows a QR code.', 'Scan that QR code here. Changes go both ways, so the laptop and this device end up the same.']],
+  cable: ['USB cable to the laptop', 'cable', ['Connect this device to the laptop with its charging cable.', 'On the device choose "File transfer". The backup is in Documents → Dushe backups.', 'On the farm laptop: Backup & sync → Import backup → choose the file on the device.']],
 };
+const MAIN_WAYS = ['usb', 'qs', 'bt']; // the ways the owner will use (19 Oct)
+const KIND = { vaccination: ['Vaccination', 'vaccinated', 'Vaccine / medicine', 'e.g. Anthrax vaccine'], treatment: ['Treatment', 'treated', 'Treatment / product', 'e.g. Dipping — tick control'] };
+const kindOf = (s) => KIND[(s && s.type) || 'vaccination'];
+const VERB = (s) => kindOf(s)[1];
 
 // ---------- helpers ----------
 const $ = (s) => document.querySelector(s);
@@ -529,6 +534,8 @@ const ICONS = {
   usb: '<rect x="7" y="9" width="10" height="12" rx="2"/><path d="M9 9V3h6v6M11 5v1M13 5v1"/>',
   cable: '<path d="M7 3v5M11 3v5M5 8h8v4a4 4 0 0 1-8 0zM9 16v2a3 3 0 0 0 3 3h3a3 3 0 0 0 3-3V5"/>',
   bt: '<path d="M7 7l10 10-5 4V3l5 4L7 17"/>',
+  share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 const textOn = (c) => (DARK_TEXT.has(c) ? '#111' : '#fff');
@@ -575,12 +582,14 @@ function progress(s) {
   return { done: target.length - missing.length, total: target.length, cats, owners, missing: missing.sort(sortTag),
     extra: [...done.keys()].filter((id) => !inTarget.has(id)).length, paper: [...done.values()].filter((v) => v.source === 'paper').length };
 }
-function lastVacc(a) {
+function lastVacc(a, type = 'vaccination') {
   let best = null;
-  for (const v of S.vaccinations) if (v.animalId === a.id && (!best || v.at > best.at)) best = v;
+  for (const v of S.vaccinations) if (v.animalId === a.id && ((session(v.sessionId) || {}).type || 'vaccination') === type && (!best || v.at > best.at)) best = v;
   if (!best) return { vaccine: '', date: '' };
   return { vaccine: (session(best.sessionId) || {}).vaccine || '', date: best.at.slice(0, 10) };
 }
+const sessionDone = (id) => S.vaccinations.filter((v) => v.sessionId === id);
+const sessionTags = (id) => sessionDone(id).map((v) => (animal(v.animalId) || {}).tag).filter(Boolean).sort();
 
 // export columns the user can tick and put in order
 const COLS = [
@@ -597,7 +606,8 @@ const COLS = [
   ['source', 'Entered', (a) => SOURCE[a.source] || ''],
   ['lastVacc', 'Last vaccine', (a) => lastVacc(a).vaccine],
   ['lastVaccDate', 'Last vaccinated on', (a) => lastVacc(a).date],
-  ['vaccCount', 'Times vaccinated', (a) => S.vaccinations.filter((v) => v.animalId === a.id).length],
+  ['vaccCount', 'Times vaccinated', (a) => S.vaccinations.filter((v) => v.animalId === a.id && ((session(v.sessionId) || {}).type || 'vaccination') === 'vaccination').length],
+  ['lastTreat', 'Last treatment', (a) => { const t = lastVacc(a, 'treatment'); return t.vaccine ? `${t.vaccine} (${t.date})` : ''; }],
   ['lastNote', 'Latest note', (a) => { const e = S.events.filter((x) => x.animalId === a.id && x.type === 'note').sort((x, y) => y.at.localeCompare(x.at))[0]; return e ? e.details : ''; }],
 ];
 const COL = Object.fromEntries(COLS.map(([k, label, get]) => [k, { label, get }]));
@@ -641,11 +651,13 @@ function seed() {
   [['Limping on the left front leg — check next week', 3], ['Moved to the north camp', 11], ['Very calm, good for handling', 27]].forEach(([t, i]) => {
     if (act[i]) events.push({ id: uid(), animalId: act[i].id, type: 'note', at: '2026-10-0' + (1 + (i % 8)) + 'T09:15:00.000Z', details: t });
   });
-  const past = { id: uid(), date: '2026-09-14', vaccine: 'Anthrax vaccine', dose: '2 ml', reason: 'Yearly anthrax vaccination', group: null, startedAt: '2026-09-14T07:30:00.000Z', endedAt: '2026-09-14T11:45:00.000Z' };
+  const dip = { id: uid(), type: 'treatment', date: '2026-08-20', vaccine: 'Dipping — tick control', dose: '', reason: 'Ticks before the rains', group: null, startedAt: '2026-08-20T07:00:00.000Z', endedAt: '2026-08-20T12:10:00.000Z' };
+  const past = { id: uid(), type: 'vaccination', date: '2026-09-14', vaccine: 'Anthrax vaccine', dose: '2 ml', reason: 'Yearly anthrax vaccination', group: null, startedAt: '2026-09-14T07:30:00.000Z', endedAt: '2026-09-14T11:45:00.000Z' };
   const vaccinations = act.filter(() => r() < 0.85).map((a, i) => ({ id: uid(), sessionId: past.id, animalId: a.id, source: 'scan', at: new Date(Date.parse(past.startedAt) + i * 90000).toISOString() }));
   const pastCount = vaccinations.length;
+  act.filter(() => r() < 0.9).forEach((a, i) => vaccinations.push({ id: uid(), sessionId: dip.id, animalId: a.id, source: 'scan', at: new Date(Date.parse(dip.startedAt) + i * 70000).toISOString() }));
   // a session that is not finished: started two days ago, some cattle scanned, some written on paper when the tablet battery was flat
-  const running = { id: uid(), date: '2026-10-17', vaccine: 'Lumpy skin disease vaccine', dose: '1 ml', reason: 'Yearly vaccination', group: null, startedAt: '2026-10-17T07:10:00.000Z', endedAt: null };
+  const running = { id: uid(), type: 'vaccination', date: '2026-10-17', vaccine: 'Lumpy skin disease vaccine', dose: '1 ml', reason: 'Yearly vaccination', group: null, startedAt: '2026-10-17T07:10:00.000Z', endedAt: null };
   const scanned = act.filter(() => r() < 0.4);
   scanned.forEach((a, i) => vaccinations.push({ id: uid(), sessionId: running.id, animalId: a.id, source: 'scan', at: new Date(Date.parse(running.startedAt) + i * 80000).toISOString() }));
   const paperDone = act.filter((a) => !scanned.includes(a)).filter((_, i) => i % 6 === 0).slice(0, 9);
@@ -654,12 +666,12 @@ function seed() {
     ['2026-09-14T07:30:00.000Z', 'Android phone', 'session.started', 'Anthrax vaccine, 2 ml — all active cattle'],
     ['2026-09-14T11:45:00.000Z', 'Android phone', 'session.ended', `Anthrax vaccine — ${pastCount} vaccinated`],
     ['2026-09-28T12:05:00.000Z', 'Android phone', 'sync', 'Synced (pretend)'],
-    ['2026-10-11T17:20:00.000Z', 'Android phone', 'backup', 'Backed up — Local Wi-Fi to the farm laptop (pretend)'],
+    ['2026-10-11T17:20:00.000Z', 'Android phone', 'backup', 'Backed up — USB flash drive / SD card (pretend)'],
     ['2026-10-17T07:10:00.000Z', 'Android tablet', 'session.started', 'Lumpy skin disease vaccine, 1 ml — all active cattle'],
     ['2026-10-18T19:30:00.000Z', 'Android tablet', 'session.paper', `Lumpy skin disease vaccine — ${paperDone.length} added from paper notes (vaccinated 2026-10-18): ${paperDone.map((a) => a.tag).join(', ')}`],
   ].map(([at, device, action, details]) => ({ id: uid(), at, device, action, details }));
-  return { farm: { name: 'Dushe The White Hacienda', number: '' }, owners, breeds: SAMPLE_BREEDS.slice(), animals, events, sessions: [past, running], vaccinations, audit,
-    exportCols: defaultCols(), exportFmt: 'xlsx', pending: scanned.length + 2, lastBackup: '2026-10-11T17:20:00.000Z', lastBackupWay: 'wifi',
+  return { farm: { name: 'Dushe The White Hacienda', number: '' }, owners, breeds: SAMPLE_BREEDS.slice(), animals, events, sessions: [dip, past, running], vaccinations, audit,
+    exportCols: defaultCols(), exportFmt: 'xlsx', pending: scanned.length + 2, lastBackup: '2026-10-11T17:20:00.000Z', lastBackupWay: 'usb',
     lastSync: '2026-09-28T12:05:00.000Z', online: false, device: 'Android tablet' };
 }
 function load() {
@@ -679,7 +691,7 @@ const RULES = {
   'POL-07': ['Only a bull can be changed to an ox', (a) => a.category === 'bull'],
   'POL-08': ['Only an active animal can be changed', (a) => a.status === 'active'],
   'POL-11': ['Already vaccinated in this session', (x) => !S.vaccinations.some((v) => v.sessionId === x.s.id && v.animalId === x.a.id)],
-  'POL-12': ['Enter the date and the vaccine / medicine name', (f) => f.date && f.vaccine.trim()],
+  'POL-12': ['Enter the date and the name of the vaccine or treatment', (f) => f.date && f.vaccine.trim()],
   'POL-15': ['An owner needs a name and a tag colour', (f) => f.name.trim() && f.colour],
   'POL-16': ['Give a reason to correct a mistake', (x) => x.a.status !== 'active' && x.reason.trim()],
   'POL-17': ['Choose the colour of this ear tag', (f) => !!COLOURS[f.tagColour]],
@@ -754,15 +766,15 @@ const Act = {
   startSession(f) {
     rule('POL-12', f);
     if (openSession()) throw new Error('A session is already running — end it first');
-    const s = { id: uid(), date: f.date, vaccine: f.vaccine.trim(), dose: f.dose.trim(), reason: f.reason.trim(), group: f.group || null, startedAt: nowIso(), endedAt: null };
-    S.sessions.push(s); log('session.started', `${s.vaccine}${s.dose ? ', ' + s.dose : ''} — ${groupLabel(s)}`);
+    const s = { id: uid(), type: f.type === 'treatment' ? 'treatment' : 'vaccination', date: f.date, vaccine: f.vaccine.trim(), dose: f.dose.trim(), reason: f.reason.trim(), group: f.group || null, startedAt: nowIso(), endedAt: null };
+    S.sessions.push(s); log('session.started', `${kindOf(s)[0]}: ${s.vaccine}${s.dose ? ', ' + s.dose : ''} — ${groupLabel(s)}`);
     return s;
   },
   vaccinate(s, a, source, at) {
     if (a.status !== 'active') throw new RuleError('POL-11', `${a.tag} is ${a.status} — skipped`);
     rule('POL-11', { s, a });
     S.vaccinations.push({ id: uid(), sessionId: s.id, animalId: a.id, source: source || 'scan', at: at || nowIso() });
-    if (source !== 'paper') log('animal.vaccinated', `${a.tag} — ${s.vaccine}`);
+    if (source !== 'paper') log(`animal.${VERB(s)}`, `${a.tag} — ${s.vaccine}`);
   },
   addPaper(s, list, date) {
     rule('POL-19', date);
@@ -771,7 +783,7 @@ const Act = {
     log('session.paper', `${s.vaccine} — ${added.length} added from paper notes (vaccinated ${date}): ${added.join(', ')}`);
     return added.length;
   },
-  endSession(s) { s.endedAt = nowIso(); const p = progress(s); log('session.ended', `${s.vaccine} — ${p.done} of ${p.total} vaccinated`); },
+  endSession(s) { s.endedAt = nowIso(); const p = progress(s); log('session.ended', `${s.vaccine} — ${p.done} of ${p.total} ${VERB(s)}`); },
   backup(way) { S.lastBackup = nowIso(); S.lastBackupWay = way; log('backup', `Backed up — ${BACKUP_WAYS[way][0]} (pretend)`, false); },
   sync() {
     if (!S.online) throw new Error('No internet — sync when you are in town');
@@ -800,7 +812,7 @@ const blankNf = (o) => ({ key: '', tag: '', fixedTag: false, ownerId: '', breed:
 // ---------- shells ----------
 const NAV = [['home', 'Home', 'home'], ['cattle', 'Cattle', 'list'], ['scan', 'Scan', 'scan'], ['owners', 'Owners', 'users'], ['more', 'More', 'more']];
 const sideItems = () => [['home', 'Home', 'home'], ['scan', hasCam() ? 'Scan ear tag' : 'Enter ear tag', 'scan'], ['new', 'Add new animal', 'plus'], ['cattle', 'Cattle', 'list'],
-  ['owners', 'Owners', 'users'], ['vacc', 'Vaccination', 'syringe'], ['export', 'Export', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings', 'gear']];
+  ['owners', 'Owners', 'users'], ['vacc', 'Vaccination & treatment', 'syringe'], ['export', 'Export', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings', 'gear']];
 const sectOf = (sect) => ({ animal: 'cattle', owner: 'owners' }[sect] || sect);
 const netPill = () => `<span class="net ${S.online ? 'on' : ''}">${S.online ? 'Online' : 'Offline'}</span>`;
 function phoneShell(v, sect) {
@@ -823,7 +835,7 @@ function sideShell(v, sect) {
 // ---------- pieces used on several screens ----------
 function sessionBanner(s) {
   const p = progress(s);
-  return `<a class="banner" href="#/vacc/${s.id}">Vaccination running: <b>${h(s.vaccine)}</b> — ${p.done} of ${p.total} done (${pct(p.done, p.total)}%)${bar(p.done, p.total)}<u>Continue ›</u></a>`;
+  return `<a class="banner" href="#/vacc/${s.id}">${kindOf(s)[0]} running: <b>${h(s.vaccine)}</b> — ${p.done} of ${p.total} done (${pct(p.done, p.total)}%)${bar(p.done, p.total)}<u>Continue ›</u></a>`;
 }
 function scanPanel(s) {
   const r = UI.read; const res = UI.result;
@@ -837,7 +849,7 @@ function scanPanel(s) {
     ${res ? `<div class="${res.kind}">${h(res.text)}</div>` : ''}
     <label class="lbl">${hasCam() ? 'Or type the ear tag number' : 'Ear tag number'}</label>
     <div class="inrow"><input id="tagin" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(UI.typed)}" onkeydown="if(event.key==='Enter')App.lookup()"><button class="btn pri" onclick="App.lookup()">Find</button></div>
-    <div class="hint">${s ? 'A known tag is marked vaccinated. A new tag is registered first.' : 'A known tag opens the animal’s record. A new tag asks for its details.'}
+    <div class="hint">${s ? `A known tag is marked ${VERB(s)}. A new tag is registered first.` : 'A known tag opens the animal’s record. A new tag asks for its details.'}
       <a class="linkbtn" href="#/new">Add a new animal without scanning</a></div>
   </div>`;
 }
@@ -869,13 +881,13 @@ const Screens = {
         <div class="card"><div class="card-h">Owners <small>active cattle</small></div>
           ${S.owners.map((o) => `<a class="row" href="#/owner/${o.id}">${avatar(o, 36)}<span class="grow"><b>${h(o.name)}</b><br><span class="small muted">${cap(o.colour)} tags</span></span><b>${totals(S.animals.filter((a) => a.ownerId === o.id)).all}</b><span class="chev">›</span></a>`).join('')}</div>
       </div>
-      ${VIEW === 'phone' ? `<div class="btnrow" style="margin-top:4px"><a class="btn" href="#/vacc">${icon('syringe')} Vaccination</a><a class="btn" href="#/export">${icon('sheet')} Export</a></div>` : ''}` };
+      ${VIEW === 'phone' ? `<div class="btnrow" style="margin-top:4px"><a class="btn" href="#/vacc">${icon('syringe')} Sessions</a><a class="btn" href="#/export">${icon('sheet')} Export</a></div>` : ''}` };
   },
 
   scan() {
     const s = openSession();
-    return { title: s ? 'Scan — vaccination' : hasCam() ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
-      ${s ? `<div class="banner">Vaccination session: <b>${h(s.vaccine)}</b> — known ear tags are marked vaccinated. <a href="#/vacc/${s.id}">Session progress ›</a></div>` : ''}
+    return { title: s ? `Scan — ${kindOf(s)[0].toLowerCase()}` : hasCam() ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
+      ${s ? `<div class="banner">${kindOf(s)[0]} session: <b>${h(s.vaccine)}</b> — known ear tags are marked ${VERB(s)}. <a href="#/vacc/${s.id}">Session progress ›</a></div>` : ''}
       <div class="${wide() ? 'dash' : ''}">${scanPanel(s)}${s ? `<div>${lastEntered(s, 6)}</div>` : ''}</div>` };
   },
 
@@ -912,7 +924,7 @@ const Screens = {
       <textarea id="nfdesc" placeholder="e.g. white face, short horns">${h(f.description)}</textarea>
       <label class="switch"><span>Written on paper earlier — entered now</span><input type="checkbox" ${f.paper ? 'checked' : ''} onchange="App.nf('paper',this.checked)"></label>
       ${f.paper ? `<label class="lbl" style="margin-top:4px">Date it happened</label><input id="nfdate" type="date" value="${h(f.date)}">` : ''}
-      ${s && !f.returnTo ? `<label class="switch"><span>Mark vaccinated in the running session (${h(s.vaccine)})</span><input type="checkbox" ${f.vacc ? 'checked' : ''} onchange="App.nf('vacc',this.checked)"></label>` : ''}
+      ${s && !f.returnTo ? `<label class="switch"><span>Mark ${VERB(s)} in the running session (${h(s.vaccine)})</span><input type="checkbox" ${f.vacc ? 'checked' : ''} onchange="App.nf('vacc',this.checked)"></label>` : ''}
       ${f.returnTo ? '<div class="proto">From a session’s paper notes — after saving you go back to the paper list to finish.</div>' : ''}
       ${f.err ? `<div class="err">${h(f.err)}</div>` : ''}
       <div class="btnrow" style="margin-top:16px"><a class="btn" href="${cancel}">Cancel</a><button class="btn pri" onclick="App.saveNew()">Save animal</button></div></div>` };
@@ -923,7 +935,7 @@ const Screens = {
     const o = ownerOf(a);
     const hist = [
       ...S.events.filter((e) => e.animalId === a.id).map((e) => ({ at: e.at, title: EV[e.type] || e.type, text: e.details, k: e.type === 'note' ? 'n' : e.type === 'died' || e.type === 'sold' ? 'x' : '', d: e.type === 'registered' && /from paper/.test(e.details) })),
-      ...S.vaccinations.filter((v) => v.animalId === a.id).map((v) => { const s = session(v.sessionId) || {}; return { at: v.at, title: 'Vaccinated', text: `${s.vaccine || ''}${s.dose ? ' · ' + s.dose : ''}${v.source === 'paper' ? ' — from paper notes' : ''}`, k: 'v', d: v.source === 'paper' }; }),
+      ...S.vaccinations.filter((v) => v.animalId === a.id).map((v) => { const s = session(v.sessionId) || {}; return { at: v.at, title: cap(VERB(s)), text: `${s.vaccine || ''}${s.dose ? ' · ' + s.dose : ''}${v.source === 'paper' ? ' — from paper notes' : ''}`, k: 'v', d: v.source === 'paper' }; }),
     ].sort((x, y) => y.at.localeCompare(x.at));
     const active = a.status === 'active';
     return { title: `Ear tag ${a.tag}`, back: '#/cattle', body: `<div class="${wide() ? 'dash' : ''}"><div>
@@ -1000,19 +1012,21 @@ const Screens = {
     if (id) return Screens.vaccSession(id);
     const s = openSession();
     const past = S.sessions.filter((x) => x.endedAt).sort((a, b) => b.date.localeCompare(a.date));
-    return { title: 'Vaccination', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
+    return { title: 'Vaccination & treatment', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
       ${s ? sessionBanner(s) : `<a class="btn pri block" href="#/vacc/new" style="margin-bottom:12px">Start a vaccination session</a>`}
       <div class="card"><div class="card-h">Past sessions</div>
-        ${past.length ? past.map((x) => { const p = progress(x); return `<a class="row" href="#/vacc/${x.id}"><span class="grow"><b>${h(x.vaccine)}</b><br><span class="small muted">${h(x.date)}${x.dose ? ' · ' + h(x.dose) : ''} · ${h(groupLabel(x))}</span></span><span class="small muted">${p.done} of ${p.total}</span><span class="chev">›</span></a>`; }).join('') : '<div class="empty">No sessions yet.</div>'}</div>
-      <div class="hint">One session can stay open over several days. Cattle done on paper are added from the session screen.</div></div>` };
+        ${past.length ? past.map((x) => { const p = progress(x); return `<a class="row" href="#/vacc/${x.id}"><span class="grow"><b>${h(x.vaccine)}</b> <span class="badge">${kindOf(x)[0]}</span><br><span class="small muted">${h(x.date)}${x.dose ? ' · ' + h(x.dose) : ''} · ${h(groupLabel(x))}</span></span><span class="small muted">${p.done} of ${p.total}</span><span class="chev">›</span></a>`; }).join('') : '<div class="empty">No sessions yet.</div>'}</div>
+      <div class="hint">A session is a vaccination or a treatment of a group (e.g. dipping, deworming). It can stay open over several days. Cattle done on paper are added from the session screen.</div></div>` };
   },
   vaccNew() {
-    if (!UI.vn) UI.vn = { date: today(), vaccine: '', dose: '', reason: '', mode: 'all', owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), err: '' };
+    if (!UI.vn) UI.vn = { type: 'vaccination', date: today(), vaccine: '', dose: '', reason: '', mode: 'all', owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), err: '' };
     const v = UI.vn;
     const n = S.animals.filter((a) => a.status === 'active' && (v.mode === 'all' || (v.owners.has(a.ownerId) && v.cats.has(a.category)))).length;
     return { title: 'Start session', back: '#/vacc', body: `<div class="narrow">
+      <label class="lbl" style="margin-top:0">Type of session</label>
+      <div class="seg2">${Object.entries(KIND).map(([k, [l]]) => `<button class="${v.type === k ? 'sel' : ''}" onclick="App.vnType('${k}')">${l}</button>`).join('')}</div>
       <label class="lbl">Date</label><input id="vd" type="date" value="${h(v.date)}" oninput="App.vn('date',this.value)">
-      <label class="lbl">Vaccine / medicine</label><input id="vv" placeholder="e.g. Anthrax vaccine" value="${h(v.vaccine)}" oninput="App.vn('vaccine',this.value)">
+      <label class="lbl">${KIND[v.type][2]}</label><input id="vv" placeholder="${KIND[v.type][3]}" value="${h(v.vaccine)}" oninput="App.vn('vaccine',this.value)">
       <label class="lbl">Dose <span class="opt">(optional)</span></label><input id="vdo" placeholder="e.g. 2 ml" value="${h(v.dose)}" oninput="App.vn('dose',this.value)">
       <label class="lbl">Reason <span class="opt">(optional)</span></label><input id="vr" placeholder="e.g. Yearly vaccination" value="${h(v.reason)}" oninput="App.vn('reason',this.value)">
       <label class="lbl">Which cattle are in this session?</label>
@@ -1024,24 +1038,25 @@ const Screens = {
       <div class="hint"><b>${n}</b> active cattle in this session — progress is counted out of this number (e.g. 13 bulls out of 40).</div>
       ${v.err ? `<div class="err">${h(v.err)}</div>` : ''}
       <button class="btn pri block" style="margin-top:16px" onclick="App.startSession()">Start session</button>
-      <div class="hint">Then scan each animal. Known tags are marked vaccinated; new tags are registered first.</div></div>` };
+      <div class="hint">Then scan each animal. Known tags are marked ${KIND[v.type][1]}; new tags are registered first.</div></div>` };
   },
   vaccSession(id) {
     const s = session(id); if (!s) return { title: 'Not found', back: '#/vacc', body: '<div class="empty">Session not found.</div>' };
     const p = progress(s); const open = !s.endedAt;
     const vs = S.vaccinations.filter((v) => v.sessionId === id);
     const day = daysBetween(s.date, today()) + 1;
-    const summary = `<div class="card"><div class="muted small">Started ${h(s.date)} · ${open ? `running${day > 1 ? ` — day ${day}` : ''}` : 'ended ' + fmtDT(s.endedAt)}</div>
+    const V = VERB(s);
+    const summary = `<div class="card"><div class="muted small"><span class="badge">${kindOf(s)[0]}</span> Started ${h(s.date)} · ${open ? `running${day > 1 ? ` — day ${day}` : ''}` : 'ended ' + fmtDT(s.endedAt)}</div>
       <div style="font-size:19px;font-weight:750;margin:2px 0">${h(s.vaccine)}</div>
       <div class="small muted">${s.dose ? 'Dose: ' + h(s.dose) : 'No dose entered'}${s.reason ? ' · ' + h(s.reason) : ''}</div>
       <div class="small muted">In this session: ${h(groupLabel(s))}</div>
-      <div class="bignum"><span class="big">${p.done}</span><span class="muted">of ${p.total} vaccinated (${pct(p.done, p.total)}%)</span></div>${bar(p.done, p.total)}
-      <div class="small" style="margin-top:8px"><b>${p.total - p.done}</b> not vaccinated yet${p.paper ? ` · ${p.paper} from paper notes` : ''}${p.extra ? ` · ${p.extra} outside the group` : ''}</div></div>`;
-    const cats = `<div class="card"><div class="card-h">By category <small>vaccinated out of ${s.group ? 'the group' : 'all active'}</small></div>
+      <div class="bignum"><span class="big">${p.done}</span><span class="muted">of ${p.total} ${V} (${pct(p.done, p.total)}%)</span></div>${bar(p.done, p.total)}
+      <div class="small" style="margin-top:8px"><b>${p.total - p.done}</b> not ${V} yet${p.paper ? ` · ${p.paper} from paper notes` : ''}${p.extra ? ` · ${p.extra} outside the group` : ''}</div></div>`;
+    const cats = `<div class="card"><div class="card-h">By category <small>${V} out of ${s.group ? 'the group' : 'all active'}</small></div>
       ${CATS.filter((c) => p.cats[c].total).map((c) => `<div class="prow"><span class="pl">${CATS_PL[c]}</span>${bar(p.cats[c].done, p.cats[c].total)}<span class="pn"><b>${p.cats[c].done}</b> of ${p.cats[c].total}</span></div>`).join('') || '<div class="empty">No cattle in this session.</div>'}</div>`;
     const owners = `<div class="card"><div class="card-h">By owner</div>
       ${S.owners.filter((o) => p.owners[o.id] && p.owners[o.id].total).map((o) => `<div class="prow"><span class="pl">${avatar(o, 22)} ${h(o.name)}</span>${bar(p.owners[o.id].done, p.owners[o.id].total)}<span class="pn"><b>${p.owners[o.id].done}</b> of ${p.owners[o.id].total}</span></div>`).join('') || '<div class="empty">No cattle in this session.</div>'}</div>`;
-    const miss = `<div class="card"><div class="card-h">Not vaccinated yet <small>${p.missing.length}</small></div>
+    const miss = `<div class="card"><div class="card-h">Not ${V} yet <small>${p.missing.length}</small></div>
       <div class="btnrow"><button class="btn sm" onclick="App.toggleMissing()">${UI.missOpen ? 'Hide list' : 'See list'}</button><button class="btn sm" onclick="App.printMissing('${id}')">${icon('print')} Print</button>
         <button class="btn sm" onclick="App.exportMissing('${id}','pdf')">${icon('pdf')} PDF</button><button class="btn sm" onclick="App.exportMissing('${id}','xlsx')">${icon('sheet')} Excel</button></div>
       ${UI.missOpen ? `<div style="margin-top:8px">${p.missing.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span></a>`).join('') || '<div class="empty">All done.</div>'}</div>` : ''}</div>`;
@@ -1049,10 +1064,14 @@ const Screens = {
       <a class="btn block" href="#/vacc/${id}/paper" style="margin-bottom:12px">${icon('paper')} Add cattle from paper notes</a>`;
     const list = `<div class="card"><div class="card-h">${open ? 'Last entered' : 'Animals vaccinated'} <small>${vs.length}</small></div>${vs.slice().reverse().slice(0, open ? 8 : 400).map(vRow).join('') || '<div class="empty">Nothing entered yet.</div>'}</div>`;
     const end = open ? `<button class="btn warn block" onclick="App.dlgEndSession('${id}')">End session</button>` : '';
+    const nam = `<div class="card"><div class="card-h">For NamLITS and the register <small>${vs.length} ear tags</small></div>
+      <div class="small muted">Records of vaccinations and treatments must be kept by law. NamLITS online asks for the ear tag number of every animal done — copy them here and paste them there when you have internet.</div>
+      <div class="btnrow" style="margin-top:10px"><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.copyTags('${id}')">${icon('copy')} Copy ear tags</button><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.saveTags('${id}')">Save list (.txt)</button></div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.exportRecord('${id}','pdf')">${icon('pdf')} Record (PDF)</button><button class="btn sm" ${vs.length ? '' : 'disabled'} onclick="App.exportRecord('${id}','xlsx')">${icon('sheet')} Record (Excel)</button></div></div>`;
     let body;
-    if (VIEW === 'tablet' && open) body = `<div class="dash"><div>${scanPanel(s)}<div style="height:12px"></div>${acts}${list}</div><div>${summary}${cats}${miss}${owners}${end}</div></div>`;
-    else if (wide()) body = `<div class="dash"><div>${summary}${acts}${cats}${owners}${end}</div><div>${miss}${list}</div></div>`;
-    else body = summary + acts + cats + miss + owners + list + end;
+    if (VIEW === 'tablet' && open) body = `<div class="dash"><div>${scanPanel(s)}<div style="height:12px"></div>${acts}${list}</div><div>${summary}${cats}${miss}${nam}${owners}${end}</div></div>`;
+    else if (wide()) body = `<div class="dash"><div>${summary}${acts}${cats}${owners}${end}</div><div>${miss}${nam}${list}</div></div>`;
+    else body = summary + acts + cats + miss + nam + owners + list + end;
     return { title: open ? 'Session running' : 'Session summary', back: '#/vacc', body };
   },
   vaccPaper(id) {
@@ -1062,13 +1081,13 @@ const Screens = {
     const ok = rows.filter((r) => r.kind === 'ok').length;
     return { title: 'Add from paper notes', back: `#/vacc/${id}`, body: `<div class="narrow">
       <div class="card"><div class="muted small">${h(s.date)} · ${s.endedAt ? 'ended' : 'running'}</div><b>${h(s.vaccine)}</b>
-        <div class="small muted" style="margin-top:6px">For cattle vaccinated while the phone or tablet was off, flat or not there, and written on paper. Type their ear tag numbers here.</div></div>
-      <label class="lbl">Date they were vaccinated</label><input id="pdate" type="date" value="${h(P.date)}" oninput="App.paperField('date',this.value)">
+        <div class="small muted" style="margin-top:6px">For cattle ${VERB(s)} while the phone or tablet was off, flat or not there, and written on paper. Type their ear tag numbers here.</div></div>
+      <label class="lbl">Date they were ${VERB(s)}</label><input id="pdate" type="date" value="${h(P.date)}" oninput="App.paperField('date',this.value)">
       <label class="lbl">Ear tag numbers <span class="opt">— one per line, or with spaces between</span></label>
       <textarea id="ptext" class="mono" style="min-height:130px" placeholder="e.g.&#10;12345678&#10;987654321" oninput="App.paperField('text',this.value)">${h(P.text)}</textarea>
       <button class="btn block" style="margin-top:10px" onclick="App.paperCheck()">Check the numbers</button>
       ${P.checked ? `<div class="card" style="margin-top:12px"><div class="card-h">Checked <small>${ok} ready to add</small></div>${rows.map(paperRow).join('') || '<div class="empty">No numbers typed.</div>'}</div>
-        <button class="btn pri block" ${ok ? '' : 'disabled'} onclick="App.paperSave()">Mark ${ok} as vaccinated</button>` : ''}
+        <button class="btn pri block" ${ok ? '' : 'disabled'} onclick="App.paperSave()">Mark ${ok} as ${VERB(s)}</button>` : ''}
       ${P.err ? `<div class="err">${h(P.err)}</div>` : ''}
       <div class="hint">A number that is not in the system can be registered from here; you come back to this list afterwards.</div></div>` };
   },
@@ -1115,9 +1134,10 @@ const Screens = {
         <div class="seg2"><button class="${S.online ? '' : 'sel'}" onclick="App.setOnline(false)">On the farm — no internet</button><button class="${S.online ? 'sel' : ''}" onclick="App.setOnline(true)">In town — internet</button></div></div>
       <div class="card"><div class="card-h">Backup <small>works without internet</small></div>
         <div>Last backup: <b>${S.lastBackup ? fmtDT(S.lastBackup) : 'never'}</b> <span class="muted small">(${ago(S.lastBackup)}${last ? ' · ' + h(last[0]) : ''})</span></div>
-        <div class="ways">${Object.entries(BACKUP_WAYS).map(([k, [l, ic]]) => `<button class="way${S.lastBackupWay === k ? ' last' : ''}" onclick="App.dlgBackup('${k}')">${icon(ic)}<span>${l}</span></button>`).join('')}</div>
+        <div class="ways">${MAIN_WAYS.map((k) => { const [l, ic] = BACKUP_WAYS[k]; return `<button class="way${S.lastBackupWay === k ? ' last' : ''}" onclick="App.dlgBackup('${k}')">${icon(ic)}<span>${l}</span></button>`; }).join('')}</div>
+        <div class="small muted" style="margin-top:10px">Other ways: ${Object.keys(BACKUP_WAYS).filter((k) => !MAIN_WAYS.includes(k)).map((k) => `<button class="linkbtn" onclick="App.dlgBackup('${k}')">${BACKUP_WAYS[k][0]}</button>`).join(' · ')}</div>
         <button class="btn block" style="margin-top:10px" onclick="App.saveBackupFile()">Save a backup file on this device</button>
-        <div class="hint">One backup file, locked with the backup password, carried any of these four ways. "Save a backup file" really downloads one here.</div></div>
+        <div class="hint">One backup file, locked with the backup password, carried any of these ways — no internet needed. Suggested: a USB flash drive after every session. "Save a backup file" really downloads one here.</div></div>
       <div class="card"><div class="card-h">Sync</div>
         <div><b>${S.pending}</b> changes waiting to sync</div>
         <div class="small muted">Last sync: ${S.lastSync ? fmtDT(S.lastSync) : 'never'} (${ago(S.lastSync)})</div>
@@ -1142,7 +1162,7 @@ const Screens = {
   },
 
   more() {
-    const items = [['vacc', 'Vaccination sessions', 'syringe'], ['new', 'Add new animal', 'plus'], ['export', 'Export — Excel, PDF, CSV', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings and breeds', 'gear']];
+    const items = [['vacc', 'Vaccination & treatment sessions', 'syringe'], ['new', 'Add new animal', 'plus'], ['export', 'Export — Excel, PDF, CSV', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings and breeds', 'gear']];
     return { title: 'More', body: `<div class="card">${items.map(([k, l, ic]) => `<a class="row" href="#/${k}"><span style="width:22px;color:var(--g)">${icon(ic)}</span><span class="grow">${l}</span><span class="chev">›</span></a>`).join('')}</div>
       <div class="proto">This is a prototype of the design. The camera, backup and sync are pretend. Everything else works and is kept in this browser.</div>` };
   },
@@ -1168,7 +1188,7 @@ function ownerAbout(o, act, breeds) {
       ${byCount(breeds).map(([b, n]) => `<div class="prow"><span class="pl">${h(b)}</span>${bar(n, act.length)}<span class="pn"><b>${n}</b></span></div>`).join('') || '<div class="empty">No active cattle.</div>'}</div>
     <div class="card"><div class="card-h">Tag colours in the ears <small>tags are mixed</small></div>
       <div class="chips">${cols.map(([c, n]) => `<span class="chip">${swatch(c)} ${cap(c)} <span class="n">${n}</span></span>`).join('') || '<span class="muted">—</span>'}</div></div>
-    <div class="card"><div class="card-h">Vaccination</div>
+    <div class="card"><div class="card-h">Vaccination & treatment</div>
       ${sp && sp.total ? `<div class="small">Running: <b>${h(s.vaccine)}</b></div><div class="prow"><span class="pl">This owner</span>${bar(sp.done, sp.total)}<span class="pn"><b>${sp.done}</b> of ${sp.total}</span></div>` : ''}
       ${last ? `<div class="small muted">Last session: ${h(last.vaccine)} (${h(last.date)}) — ${lastN} of this owner's cattle</div>` : '<div class="small muted">No sessions yet.</div>'}</div>`;
 }
@@ -1176,7 +1196,7 @@ function ownerActivity(o) {
   const ids = new Set(S.animals.filter((a) => a.ownerId === o.id).map((a) => a.id));
   const items = [
     ...S.events.filter((e) => ids.has(e.animalId)).map((e) => ({ at: e.at, id: e.animalId, title: EV[e.type] || e.type, text: e.details, k: e.type === 'note' ? 'n' : e.type === 'died' || e.type === 'sold' ? 'x' : '', d: /from paper/.test(e.details) })),
-    ...S.vaccinations.filter((v) => ids.has(v.animalId)).map((v) => ({ at: v.at, id: v.animalId, title: 'Vaccinated', text: (session(v.sessionId) || {}).vaccine + (v.source === 'paper' ? ' — from paper notes' : ''), k: 'v', d: v.source === 'paper' })),
+    ...S.vaccinations.filter((v) => ids.has(v.animalId)).map((v) => ({ at: v.at, id: v.animalId, title: cap(VERB(session(v.sessionId))), text: (session(v.sessionId) || {}).vaccine + (v.source === 'paper' ? ' — from paper notes' : ''), k: 'v', d: v.source === 'paper' })),
   ].sort((x, y) => y.at.localeCompare(x.at)).slice(0, 40);
   return `<div class="card"><div class="card-h">Recent activity <small>latest ${items.length}</small></div>
     <ul class="tl">${items.map((x) => `<li><span class="dot ${x.k}"></span><div><div><a class="mono" href="#/animal/${x.id}"><b>${h((animal(x.id) || {}).tag)}</b></a> · ${h(x.title)}${x.text ? ' — ' + h(x.text) : ''}</div><div class="when">${when(x.at, x.d)}</div></div></li>`).join('') || '<li class="empty">Nothing yet.</li>'}</ul></div>`;
@@ -1206,7 +1226,7 @@ function paperCheck(s, tags) {
     const a = byTag(tag);
     if (!a) return { tag, kind: 'new', text: 'Not in the system yet' };
     if (a.status !== 'active') return { tag, a, kind: 'skip', text: `${a.status === 'dead' ? 'Dead' : 'Sold'} — skipped` };
-    if (S.vaccinations.some((v) => v.sessionId === s.id && v.animalId === a.id)) return { tag, a, kind: 'dup', text: 'Already vaccinated in this session' };
+    if (S.vaccinations.some((v) => v.sessionId === s.id && v.animalId === a.id)) return { tag, a, kind: 'dup', text: `Already ${VERB(s)} in this session` };
     return { tag, a, kind: 'ok', text: `${CAT[a.category]} · ${a.breed} · ${ownerName(a.ownerId)}${inGroup(s, a) ? '' : ' (outside the group)'}` };
   });
 }
@@ -1281,7 +1301,7 @@ const api = {
     if (s) {
       try {
         Act.vaccinate(s, a, source); const p = progress(s); const outside = !inGroup(s, a);
-        UI.result = { kind: outside ? 'warnbox' : 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${a.breed}, ${ownerName(a.ownerId)}) marked vaccinated${outside ? ' — note: it is not in the group chosen for this session' : ''} — ${p.done} of ${p.total} done` };
+        UI.result = { kind: outside ? 'warnbox' : 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${a.breed}, ${ownerName(a.ownerId)}) marked ${VERB(s)}${outside ? ' — note: it is not in the group chosen for this session' : ''} — ${p.done} of ${p.total} done` };
       }
       catch (e) { UI.result = { kind: 'warnbox', text: `${tag}: ${e.message}` }; }
       render(); return;
@@ -1315,7 +1335,7 @@ const api = {
       if (f.returnTo) { toast(`Saved — ${a.tag}. Now mark it from the paper list.`); go(f.returnTo); return; }
       if (s && f.vacc) {
         Act.vaccinate(s, a, f.paper ? 'paper' : f.source, f.paper ? `${f.date}T12:00:00.000Z` : null); const p = progress(s);
-        UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked vaccinated — ${p.done} of ${p.total} done` };
+        UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked ${VERB(s)} — ${p.done} of ${p.total} done` };
         go(VIEW === 'tablet' ? `#/vacc/${s.id}` : '#/scan'); return;
       }
       toast(`Saved — ${a.tag}`); go(`#/animal/${a.id}`);
@@ -1420,6 +1440,7 @@ const api = {
   ofSearch(v) { UI.of.q = v; $('#olist').innerHTML = ownerList(); },
   vn(field, val) { UI.vn[field] = val; },
   vnMode(m) { UI.vn.mode = m; render(); },
+  vnType(t) { UI.vn.type = t; render(); },
   vnToggle(kind, v) { const s = UI.vn[kind]; s.has(v) ? s.delete(v) : s.add(v); render(); },
   startSession() {
     const v = UI.vn;
@@ -1429,28 +1450,57 @@ const api = {
       group = { owners: v.owners.size === S.owners.length ? null : [...v.owners], cats: v.cats.size === CATS.length ? null : [...v.cats] };
       if (!group.owners && !group.cats) group = null;
     }
-    try { const s = Act.startSession({ date: v.date, vaccine: v.vaccine, dose: v.dose, reason: v.reason, group }); UI.vn = null; toast('Session started — scan the first animal'); go(`#/vacc/${s.id}`); }
+    try { const s = Act.startSession({ type: v.type, date: v.date, vaccine: v.vaccine, dose: v.dose, reason: v.reason, group }); UI.vn = null; toast('Session started — scan the first animal'); go(`#/vacc/${s.id}`); }
     catch (e) { v.err = e.message; render(); }
   },
   dlgEndSession(id) {
     const s = session(id); const p = progress(s);
-    modal(`<h3>End the session?</h3><div class="small muted">${h(s.vaccine)} — ${p.done} of ${p.total} vaccinated; ${p.total - p.done} not done.</div>
+    modal(`<h3>End the session?</h3><div class="small muted">${h(s.vaccine)} — ${p.done} of ${p.total} ${VERB(s)}; ${p.total - p.done} not done.</div>
       <div class="hint">Cattle written on paper can still be added after the session ends.</div>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doEndSession('${id}')">End session</button></div>`);
   },
   doEndSession(id) { Act.endSession(session(id)); close(); UI.result = null; toast('Session ended'); render(); },
   toggleMissing() { UI.missOpen = !UI.missOpen; render(); },
-  printMissing(id) { const s = session(id); const p = progress(s); printTable(`${S.farm.name} — not vaccinated yet`, `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not vaccinated · printed ${fmtDT(nowIso())}`, missingRows(s)); },
+  printMissing(id) { const s = session(id); const p = progress(s); printTable(`${S.farm.name} — not ${VERB(s)} yet`, `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not ${VERB(s)} · printed ${fmtDT(nowIso())}`, missingRows(s)); },
   exportMissing(id, fmt) {
     const s = session(id); const p = progress(s); const rows = missingRows(s);
-    const base = `Dushe_Not_vaccinated_${s.vaccine.replace(/[^\w]+/g, '_')}_${today()}`;
-    if (fmt === 'pdf') download(PdfLite.table({ title: `${S.farm.name} — not vaccinated yet`, subtitle: `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not vaccinated · ${fmtDT(nowIso())}`, columns: rows[0], rows: rows.slice(1), footer: S.farm.name }), base + '.pdf', 'application/pdf');
+    const base = `Dushe_Not_${VERB(s)}_${s.vaccine.replace(/[^\w]+/g, '_')}_${today()}`;
+    if (fmt === 'pdf') download(PdfLite.table({ title: `${S.farm.name} — not ${VERB(s)} yet`, subtitle: `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not ${VERB(s)} · ${fmtDT(nowIso())}`, columns: rows[0], rows: rows.slice(1), footer: S.farm.name }), base + '.pdf', 'application/pdf');
     else download(XlsxLite.workbook([
-      { name: 'Not vaccinated', rows, widths: [5, 14, 16, 11, 14, 10, 8], filter: true },
-      { name: 'Session', rows: [['Item', 'Value'], ['Farm', S.farm.name], ['Vaccine / medicine', s.vaccine], ['Started', s.date], ['In this session', groupLabel(s)], ['Vaccinated', `${p.done} of ${p.total}`], ['Not vaccinated', p.missing.length], ['Exported', fmtDT(nowIso())]], widths: [20, 50] },
+      { name: `Not ${VERB(s)}`, rows, widths: [5, 14, 16, 11, 14, 10, 8], filter: true },
+      { name: 'Session', rows: [['Item', 'Value'], ['Farm', S.farm.name], ['Type', kindOf(s)[0]], [kindOf(s)[2], s.vaccine], ['Started', s.date], ['In this session', groupLabel(s)], [cap(VERB(s)), `${p.done} of ${p.total}`], [`Not ${VERB(s)}`, p.missing.length], ['Exported', fmtDT(nowIso())]], widths: [20, 50] },
     ]), base + '.xlsx', XLSX);
-    log('export', `Not vaccinated — ${s.vaccine}: ${p.missing.length} cattle (${fmt === 'pdf' ? 'PDF' : 'Excel'})`, false);
+    log('export', `Not ${VERB(s)} — ${s.vaccine}: ${p.missing.length} cattle (${fmt === 'pdf' ? 'PDF' : 'Excel'})`, false);
     toast(`${fmt === 'pdf' ? 'PDF' : 'Excel'} file saved — ${p.missing.length} cattle`);
+  },
+  copyTags(id) {
+    const s = session(id); const text = sessionTags(id).join('\n'); const n = sessionTags(id).length;
+    const done = () => { toast(`${n} ear tags copied — paste them into NamLITS online`); log('session.tags_copied', `${s.vaccine} — ${n} ear tags copied for NamLITS`, false); };
+    const fallback = () => {
+      try {
+        const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(t); t.select();
+        const ok = document.execCommand('copy'); t.remove(); if (ok) { done(); return; }
+      } catch (e) { /* use the text file instead */ }
+      toast('Could not copy here — use "Save list (.txt)"', 'warn');
+    };
+    try { if (typeof navigator !== 'undefined' && navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback(); } catch (e) { fallback(); }
+  },
+  saveTags(id) {
+    const s = session(id); const tags = sessionTags(id);
+    download(tags.join('\r\n') + '\r\n', `Dushe_NamLITS_tags_${s.vaccine.replace(/[^\w]+/g, '_')}_${s.date}.txt`, 'text/plain;charset=utf-8');
+    log('export', `NamLITS ear tag list — ${s.vaccine}: ${tags.length} tags`, false); toast(`List saved — ${tags.length} ear tags`);
+  },
+  exportRecord(id, fmt) {
+    const s = session(id); const k = kindOf(s);
+    const rows = [['#', 'Date', 'Ear tag', 'Owner', 'Category', 'Breed', 'Entered'], ...sessionDone(id).map((v) => animal(v.animalId)).filter(Boolean).sort((x, y) => x.tag.localeCompare(y.tag))
+      .map((a, i) => { const v = sessionDone(id).find((x) => x.animalId === a.id); return [i + 1, v.source === 'paper' ? v.at.slice(0, 10) : fmtDT(v.at).slice(0, 10), a.tag, ownerName(a.ownerId), CAT[a.category], a.breed, SOURCE[v.source] || '']; })];
+    const info = [['Item', 'Value'], ['Farm', S.farm.name], ['Farm number', S.farm.number || ''], ['Type', k[0]], [k[2], s.vaccine], ['Dose', s.dose || ''], ['Reason', s.reason || ''],
+      ['Started', s.date], ['Ended', s.endedAt ? fmtDT(s.endedAt) : 'still running'], ['In this session', groupLabel(s)], [`Number ${k[1]}`, rows.length - 1], ['Exported', fmtDT(nowIso())]];
+    const base = `Dushe_${k[0]}_record_${s.vaccine.replace(/[^\w]+/g, '_')}_${s.date}`;
+    if (fmt === 'pdf') download(PdfLite.table({ title: `${S.farm.name} — ${k[0].toLowerCase()} record`, subtitle: `${s.vaccine}${s.dose ? ' · ' + s.dose : ''}${s.reason ? ' · ' + s.reason : ''} · started ${s.date} · ${rows.length - 1} ${k[1]}${S.farm.number ? ' · farm number ' + S.farm.number : ''}`, columns: rows[0], rows: rows.slice(1), footer: S.farm.name }), base + '.pdf', 'application/pdf');
+    else download(XlsxLite.workbook([{ name: 'Record', rows, widths: [5, 12, 14, 16, 10, 14, 16], filter: true }, { name: 'Session', rows: info, widths: [22, 50] }]), base + '.xlsx', XLSX);
+    log('export', `${k[0]} record — ${s.vaccine}: ${rows.length - 1} cattle (${fmt === 'pdf' ? 'PDF' : 'Excel'})`, false);
+    toast(`${fmt === 'pdf' ? 'PDF' : 'Excel'} record saved — ${rows.length - 1} cattle`);
   },
   paperField(k, v) { UI.paper[k] = v; },
   paperCheck() { const P = UI.paper; P.text = $('#ptext').value; P.date = $('#pdate').value; P.checked = true; P.checkedText = P.text; P.err = ''; render(); },
