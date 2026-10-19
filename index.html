@@ -27,6 +27,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--g2);outline-offs
 #stage{display:flex;justify-content:center;padding:22px 12px 44px}
 #device{position:relative;background:var(--bg);overflow:hidden}
 body.phone #device{width:390px;height:844px;border:11px solid #111;border-radius:46px;box-shadow:0 22px 50px rgba(0,0,0,.25)}
+body.tablet #device{width:min(1180px,100%);height:min(800px,calc(100vh - 100px));min-height:560px;border:12px solid #111;border-radius:28px;box-shadow:0 18px 44px rgba(0,0,0,.22)}
 body.desktop #device{width:min(1280px,100%);height:min(820px,calc(100vh - 100px));min-height:560px;border:1px solid #c3cfc7;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
 @media (max-width:560px){
   body.phone #stage{padding:0}
@@ -36,7 +37,7 @@ body.desktop #device{width:min(1280px,100%);height:min(820px,calc(100vh - 100px)
 
 /* ---------- app shell ---------- */
 #app{height:100%;display:flex;flex-direction:column}
-body.desktop #app{flex-direction:row}
+body.wide #app{flex-direction:row}
 .hdr{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--g);color:#fff;flex:none}
 body.phone .hdr{padding-top:24px}
 .hdr .ttl{flex:1;font-weight:650;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -44,18 +45,20 @@ body.phone .hdr{padding-top:24px}
 .net{font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.16);white-space:nowrap}
 .net.on{background:#8EDBA8;color:#0d3320}
 .main{flex:1;overflow:auto;padding:14px 14px 28px}
-body.desktop .main{padding:22px 26px 36px}
+body.wide .main{padding:22px 26px 36px}
 .tabs{flex:none;display:flex;justify-content:space-around;align-items:flex-end;border-top:1px solid var(--line);background:#fff;padding:6px 4px 16px}
 .tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mute);min-width:62px}
 .tabs a.on{color:var(--g);font-weight:650}
 .tabs svg{width:24px;height:24px}
 .tabs a.scanbtn .ic{background:var(--g);color:#fff;border-radius:50%;width:58px;height:58px;display:grid;place-items:center;margin-top:-28px;box-shadow:0 5px 14px rgba(31,78,61,.45)}
 .tabs a.scanbtn span{color:var(--g);font-weight:650}
-.side{width:236px;flex:none;background:#16372b;color:#d4e5da;display:flex;flex-direction:column;padding:16px 10px}
+.side{width:236px;flex:none;background:#16372b;color:#d4e5da;display:flex;flex-direction:column;padding:16px 10px;overflow:auto}
+body.tablet .side{width:208px}
 .side .brand{color:#fff;font-weight:750;font-size:19px;padding:4px 12px 18px;line-height:1.2}
 .side .brand small{display:block;font-weight:400;font-size:12px;color:#a8c6b5;margin-top:3px}
 .side a{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;margin:1px 0}
-.side a svg{width:18px;height:18px;opacity:.85}
+body.tablet .side a{padding:11px 12px}
+.side a svg{width:18px;height:18px;opacity:.85;flex:none}
 .side a:hover{background:#21483a}
 .side a.on{background:var(--g2);color:#fff}
 .side .foot{margin-top:auto;font-size:12px;color:#a8c6b5;padding:12px;border-top:1px solid #2a5243}
@@ -66,8 +69,8 @@ body.desktop .main{padding:22px 26px 36px}
 .card-h{display:flex;justify-content:space-between;align-items:center;font-weight:650;margin-bottom:10px;gap:8px}
 .card-h small{font-weight:400;color:var(--mute)}
 .dash{display:block}
-body.desktop .dash{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-body.desktop .dash .card{margin-bottom:0}
+body.wide .dash{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+body.wide .dash>div>.card:last-child{margin-bottom:0}
 .narrow{max-width:620px}
 .farm .fname{font-size:20px;font-weight:750;color:var(--g)}
 .farm .fnum{color:var(--mute);font-size:13px}
@@ -76,14 +79,18 @@ body.desktop .dash .card{margin-bottom:0}
 .pill.off{background:var(--amberbg);border-color:#ecd789;color:var(--amber)}
 .pill.on{background:#E2F5E8;border-color:#a9dcb9;color:#1d6b3a}
 .banner{display:block;background:var(--amberbg);border:1px solid #ecd789;color:#5c4700;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
-.banner a{text-decoration:underline;font-weight:600}
+.banner a,.banner u{text-decoration:underline;font-weight:600}
+.banner .bar{margin:8px 0 6px;background:rgba(0,0,0,.08)}
+.banner .bar i{background:#8a6a00}
 .bigscan{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--g);color:#fff;border-radius:16px;padding:18px;font-size:18px;font-weight:700;margin-bottom:12px;box-shadow:0 6px 16px rgba(31,78,61,.25)}
 .bigscan svg{width:28px;height:28px}
+.homebtns{display:grid;gap:8px;margin-bottom:12px}
+.homebtns .bigscan{margin-bottom:0}
+body.wide .homebtns{grid-template-columns:2fr 1fr}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .stat{background:var(--gl);border-radius:12px;padding:10px 6px;text-align:center}
 .stat b{display:block;font-size:22px;color:var(--g)}
 .stat span{font-size:12px;color:var(--mute)}
-.stat.sel{outline:2px solid var(--g)}
 .row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .grow{flex:1;min-width:0}
@@ -97,15 +104,18 @@ body.desktop .dash .card{margin-bottom:0}
 .badge.sold{background:#ececec;color:#555}
 .badge.dead{background:var(--redbg);color:var(--red)}
 .badge.active{background:#E2F5E8;color:#1d6b3a}
+.src{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--amberbg);color:#6b5200;white-space:nowrap;font-weight:600}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--g);background:#fff;color:var(--g);border-radius:10px;padding:10px 14px;font-weight:650}
+.btn svg{width:18px;height:18px;flex:none}
 .btn.pri{background:var(--g);color:#fff}
 .btn.warn{border-color:var(--red);color:var(--red)}
 .btn.block{width:100%}
+.btn.sm{padding:7px 11px;font-size:13.5px;border-radius:9px}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 .btnrow .btn{flex:1}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-body.desktop .actions{grid-template-columns:repeat(3,1fr)}
+body.wide .actions{grid-template-columns:repeat(3,1fr)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:14px}
 .chip.sel{border-color:var(--g);background:var(--gl);font-weight:650;box-shadow:inset 0 0 0 1px var(--g)}
@@ -118,7 +128,7 @@ body.desktop .actions{grid-template-columns:repeat(3,1fr)}
 .lbl .opt{font-weight:400}
 .hint{font-size:12.5px;color:var(--mute);margin-top:6px}
 .inrow{display:flex;gap:8px}
-.inrow input{flex:1}
+.inrow input,.inrow select{flex:1;min-width:0}
 .err{color:var(--red);background:var(--redbg);border-radius:10px;padding:9px 12px;margin-top:10px;font-size:14px}
 .ok{color:#1d6b3a;background:#E2F5E8;border-radius:10px;padding:9px 12px;margin-top:10px;font-size:14px}
 .warnbox{color:#5c4700;background:var(--amberbg);border-radius:10px;padding:9px 12px;margin-top:10px;font-size:14px}
@@ -132,7 +142,8 @@ body.desktop .actions{grid-template-columns:repeat(3,1fr)}
 .readcard .num{font-size:28px;font-weight:750;color:var(--g)}
 .tagvis{display:inline-block;font:750 26px ui-monospace,"Cascadia Mono",Consolas,monospace;padding:12px 18px 16px;border-radius:14px 14px 34px 34px;border:1px solid rgba(0,0,0,.2);box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
 .animal-h{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:14px;margin-top:6px}
+.ownerlink{display:inline-flex;align-items:center;gap:6px;text-decoration:underline;font-size:14px;margin-top:4px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:14px;margin-top:10px}
 .kv dt{color:var(--mute)}
 .kv dd{margin:0}
 .tl{list-style:none;margin:0;padding:0}
@@ -144,33 +155,106 @@ body.desktop .actions{grid-template-columns:repeat(3,1fr)}
 .tl .dot.x{background:#8C1D18}
 .tl .when{font-size:12px;color:var(--mute)}
 .big{font-size:44px;font-weight:800;color:var(--g);line-height:1}
+.bignum{display:flex;align-items:baseline;gap:8px;margin:12px 0 8px}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;background:var(--gl);color:var(--g);padding:9px 10px;position:sticky;top:-22px;font-weight:650;white-space:nowrap}
 .tbl td{padding:8px 10px;border-bottom:1px solid var(--line)}
 .tbl tr.click:hover td{background:#f6faf7;cursor:pointer}
 .check{display:flex;align-items:center;gap:8px;padding:6px 0}
-.check input{width:18px;height:18px;margin:0}
+.check input{width:18px;height:18px;margin:0;flex:none}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
-.switch input{width:20px;height:20px}
+.switch input{width:20px;height:20px;flex:none}
 .linkbtn{background:none;border:0;color:var(--g2);text-decoration:underline;padding:0 4px;font-size:13px}
 #modal .ov{position:absolute;inset:0;background:rgba(10,20,15,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
-body.desktop #modal .ov{align-items:center}
+body.wide #modal .ov{align-items:center}
 .dlg{background:#fff;width:100%;max-width:470px;border-radius:20px 20px 0 0;padding:18px 18px 22px;max-height:88%;overflow:auto}
-body.desktop .dlg{border-radius:16px}
+body.wide .dlg{border-radius:16px}
 .dlg h3{margin:0 0 4px;color:var(--g)}
 #toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:#13302a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:88%;text-align:center}
-body.desktop #toast{bottom:30px}
+body.wide #toast{bottom:30px}
 #toast.show{opacity:1}
 #toast.warn{background:#6b4f00}
 #toast.err{background:var(--red)}
 .empty{color:var(--mute);text-align:center;padding:18px}
+body.phone .hide-s{display:none}
+
+/* ---------- progress ---------- */
+.bar{display:block;flex:1;height:8px;background:#e3eae5;border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--g2);border-radius:999px}
+.prow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.prow .pl{width:112px;flex:none;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .pn{min-width:76px;text-align:right;font-size:13.5px;color:var(--mute);white-space:nowrap}
+.prow .pn b{color:var(--ink)}
+.pk{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;flex:none;background:#ececec;color:#555}
+.pk.ok{background:#E2F5E8;color:#1d6b3a}
+.pk.new{background:var(--amberbg);color:var(--amber)}
+.pk.bad{background:var(--redbg);color:var(--red)}
+
+/* ---------- owners and profile ---------- */
+.av{display:inline-grid;place-items:center;border-radius:50%;font-weight:750;flex:none;overflow:hidden;letter-spacing:.5px}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.ocards{display:grid;gap:10px}
+body.wide .ocards{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.ocard{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.ocard:hover{border-color:#b5c9bc}
+.ocard .grow{display:flex;flex-direction:column;gap:2px}
+.ocard .oname{font-size:16px}
+.ocount{text-align:center;min-width:54px}
+.ocount b{display:block;font-size:21px;color:var(--g);line-height:1.1}
+.ocount span{font-size:11.5px;color:var(--mute)}
+.prof{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:12px}
+.cover{height:96px;background-image:radial-gradient(circle at 88% 18%,rgba(255,255,255,.38),transparent 46%),linear-gradient(135deg,rgba(255,255,255,.22),rgba(0,0,0,.30))}
+.prof-in{padding:0 16px 16px}
+.prof-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:-46px}
+.prof-top .av{border:4px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.16)}
+.avwrap{position:relative;display:inline-block}
+.avcam{position:absolute;right:0;bottom:4px;width:32px;height:32px;border-radius:50%;border:2px solid #fff;background:var(--g);color:#fff;display:grid;place-items:center;padding:0}
+.avcam svg{width:16px;height:16px}
+.prof-name{font-size:23px;font-weight:800;margin-top:10px;line-height:1.2}
+.prof-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--mute);font-size:13.5px;margin-top:3px}
+.prof-bio{margin-top:8px;font-size:14px}
+.prof-btns{display:flex;gap:8px;margin-top:14px}
+.pbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--gl);border:0;border-radius:12px;padding:10px 4px;color:var(--g);font-size:12.5px;font-weight:650}
+.pbtn svg{width:20px;height:20px}
+.pbtn:hover{background:#e2ede6}
+.prof-stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
+.prof-stats div+div{border-left:1px solid var(--line)}
+.prof-stats b{display:block;font-size:20px}
+.prof-stats span{font-size:12px;color:var(--mute)}
+.ptabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px}
+.ptabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:9px;font-weight:650;color:var(--mute)}
+.ptabs button.on{background:var(--g);color:#fff}
+.info{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.info:last-child{border-bottom:0}
+.ii{width:34px;height:34px;border-radius:10px;background:var(--gl);color:var(--g);display:grid;place-items:center;flex:none}
+.ii svg{width:18px;height:18px}
+
+/* ---------- backup ---------- */
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.way{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;font-size:13.5px;font-weight:600;color:var(--ink)}
+.way svg{width:22px;height:22px;color:var(--g)}
+.way:hover{border-color:var(--g2)}
+.way.last{border-color:var(--g2);box-shadow:inset 0 0 0 1px var(--g2)}
+.steps{padding-left:22px;margin:10px 0 4px}
+.steps li{margin:7px 0}
+
+/* ---------- export ---------- */
+.tblwrap{overflow:auto;max-width:100%}
+.tblwrap .tbl th{position:static}
+.tblwrap .tbl td{white-space:nowrap}
+.colrow{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line)}
+.colrow:last-of-type{border-bottom:0}
+.colrow.off{color:var(--mute)}
+.coln{width:22px;text-align:center;font-weight:750;color:var(--g);font-size:13px;flex:none}
+.mv{width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--g);font-size:12px;padding:0;flex:none}
+.mv[disabled]{opacity:.3;cursor:default}
 </style>
 </head>
 <body class="phone">
 <div id="topbar">
   <span><b>Dushe Livestock</b> — clickable prototype</span>
   <span class="note">Sample data only · camera, backup and sync are pretend · works with no internet</span>
-  <span class="seg"><button id="vPhone" onclick="App.setView('phone')">Phone</button><button id="vDesk" onclick="App.setView('desktop')">Desktop</button></span>
+  <span class="seg"><button id="vPhone" onclick="App.setView('phone')">Phone</button><button id="vTab" onclick="App.setView('tablet')">Tablet</button><button id="vDesk" onclick="App.setView('desktop')">Desktop</button></span>
 </div>
 <div id="stage"><div id="device"><div id="app"></div><div id="modal"></div><div id="toast"></div></div></div>
 
@@ -275,17 +359,127 @@ window.XlsxLite = (() => {
 })();
 </script>
 
+<script id="pdf-lite">
+// Minimal PDF writer (no libraries): a table over A4 pages with the built-in Helvetica font.
+window.PdfLite = (() => {
+  // Helvetica character widths (1/1000 em) for codes 32..126
+  const HW = [278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278,
+    556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556, 1015,
+    667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611,
+    278, 278, 278, 469, 556, 333,
+    556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500,
+    334, 260, 334, 584];
+  const WIDE = { 133: 1000, 145: 222, 146: 222, 150: 556, 151: 1000, 183: 278 };
+  const ANSI = { '—': 151, '–': 150, '’': 146, '‘': 145, '“': 147, '”': 148, '•': 149, '…': 133, '€': 128 };
+  const SWAP = { '→': '->', '←': '<-', '✓': 'Yes', ' ': ' ' };
+  // Unicode -> WinAnsi byte string (one char per byte)
+  function ansi(v) {
+    let out = '';
+    for (const ch of String(v == null ? '' : v)) {
+      const c = ch.codePointAt(0);
+      if (SWAP[ch]) out += SWAP[ch];
+      else if (c >= 32 && c < 127) out += ch;
+      else if (ANSI[ch]) out += String.fromCharCode(ANSI[ch]);
+      else if (c >= 160 && c <= 255) out += ch;
+      else out += '?';
+    }
+    return out;
+  }
+  const cw = (c) => (c >= 32 && c <= 126 ? HW[c - 32] : WIDE[c] || 556);
+  const width = (s, size, bold) => { let w = 0; for (let i = 0; i < s.length; i++) w += cw(s.charCodeAt(i)); return (w * size / 1000) * (bold ? 1.07 : 1); };
+  const fit = (s, max, size, bold) => { if (width(s, size, bold) <= max + 0.05) return s; while (s.length > 1 && width(s + '\x85', size, bold) > max) s = s.slice(0, -1); return s + '\x85'; };
+  const esc = (s) => s.replace(/[\\()]/g, (m) => '\\' + m);
+  const n = (v) => String(Math.round(v * 100) / 100);
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  const txt = (x, y, s, size, bold, rgb) => `${rgb} rg BT /${bold ? 'F2' : 'F1'} ${size} Tf ${n(x)} ${n(y)} Td (${esc(s)}) Tj ET\n`;
+
+  function table(o) {
+    const land = !!o.landscape, PW = land ? 842 : 595, PH = land ? 595 : 842, M = 36, size = 8.5, rowH = 15, pad = 4, bottom = M + 10;
+    const head = o.columns.map(ansi), rows = o.rows.map((r) => r.map(ansi));
+    let ws = head.map((hd, i) => { let w = width(hd, size, true); for (const r of rows.slice(0, 400)) w = Math.max(w, width(r[i] || '', size)); return Math.min(w, 260) + pad * 2; });
+    const avail = PW - 2 * M;
+    let total = sum(ws);
+    for (let g = 0; total > avail && g < 600; g++) { // trim the widest column first
+      let i0 = 0; ws.forEach((w, i) => { if (w > ws[i0]) i0 = i; });
+      if (ws[i0] <= 36) break;
+      ws[i0] = Math.max(36, ws[i0] - Math.min(6, total - avail)); total = sum(ws);
+    }
+    if (total !== avail) { ws = ws.map((w) => (w * avail) / total); total = avail; } // fill the page width
+    const y1 = PH - M - 46, yN = PH - M;
+    const per1 = Math.max(1, Math.floor((y1 - rowH - bottom) / rowH)), perN = Math.max(1, Math.floor((yN - rowH - bottom) / rowH));
+    const pages = [rows.slice(0, per1)];
+    for (let i = per1; i < rows.length; i += perN) pages.push(rows.slice(i, i + perN));
+    const streams = pages.map((pr, pi) => {
+      let s = '', y = pi ? yN : y1, x;
+      if (!pi) {
+        s += txt(M, PH - M - 14, fit(ansi(o.title), avail, 15, true), 15, true, '0.122 0.306 0.239');
+        s += txt(M, PH - M - 30, fit(ansi(o.subtitle), avail, 9), 9, false, '0.35 0.35 0.35');
+      }
+      s += `0.122 0.306 0.239 rg ${n(M)} ${n(y - rowH)} ${n(total)} ${n(rowH)} re f\n`;
+      x = M; head.forEach((hd, ci) => { s += txt(x + pad, y - rowH + 4.6, fit(hd, ws[ci] - pad * 2, size, true), size, true, '1 1 1'); x += ws[ci]; });
+      y -= rowH;
+      pr.forEach((r, ri) => {
+        if (ri % 2) s += `0.953 0.965 0.957 rg ${n(M)} ${n(y - rowH)} ${n(total)} ${n(rowH)} re f\n`;
+        x = M; ws.forEach((w, ci) => { s += txt(x + pad, y - rowH + 4.6, fit(r[ci] || '', w - pad * 2, size), size, false, '0.1 0.1 0.1'); x += w; });
+        s += `0.85 0.89 0.86 RG 0.5 w ${n(M)} ${n(y - rowH)} m ${n(M + total)} ${n(y - rowH)} l S\n`;
+        y -= rowH;
+      });
+      s += txt(M, 24, fit(ansi(`${o.footer || ''}   ·   Page ${pi + 1} of ${pages.length}`), avail, 8), 8, false, '0.45 0.45 0.45');
+      return s;
+    });
+    const objs = ['<< /Type /Catalog /Pages 2 0 R >>', '',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'];
+    const kids = [];
+    streams.forEach((c) => {
+      const pageNo = objs.length + 1;
+      kids.push(`${pageNo} 0 R`);
+      objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${pageNo + 1} 0 R >>`);
+      objs.push(`<< /Length ${c.length} >>\nstream\n${c}endstream`);
+    });
+    objs[1] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${kids.length} >>`;
+    const d = new Date(), p2 = (v) => String(v).padStart(2, '0');
+    objs.push(`<< /Title (${esc(ansi(o.title))}) /Producer (Dushe Livestock prototype) /CreationDate (D:${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}) >>`);
+    let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+    const offs = [];
+    objs.forEach((ob, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${ob}\nendobj\n`; });
+    const xref = out.length;
+    out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map((v) => String(v).padStart(10, '0') + ' 00000 n \n').join('');
+    out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${objs.length} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+    const bytes = new Uint8Array(out.length);
+    for (let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+    return bytes;
+  }
+  return { table, ansi };
+})();
+</script>
+
 <script>
 window.App = (() => {
 'use strict';
-const KEY = 'dushe-prototype-v1';
+const KEY = 'dushe-prototype-v2';
 const COLOURS = { blue: '#2F6FD0', yellow: '#F5D20A', red: '#D93025', orange: '#F28C28', green: '#2E9E4F', pink: '#F06FAA' };
 const DARK_TEXT = new Set(['yellow', 'orange', 'pink']);
 const CATS = ['cow', 'heifer', 'bull', 'ox'];
 const CAT = { bull: 'Bull', ox: 'Ox', cow: 'Cow', heifer: 'Heifer' };
 const CATS_PL = { cow: 'Cows', heifer: 'Heifers', bull: 'Bulls', ox: 'Oxen' };
 const GENDER_CATS = { male: ['bull', 'ox'], female: ['heifer', 'cow'] };
+const SAMPLE_BREEDS = ['Afrikaner', 'Bonsmara', 'Brahman', 'Cross-breed', 'Nguni', 'Sanga', 'Simbra', 'Simmentaler'];
+const DEVICES = ['Android tablet', 'Android phone', 'Farm laptop', 'iPhone'];
+const SOURCE = { scan: 'Scanned', typed: 'Typed', paper: 'From paper notes' };
 const EV = { registered: 'Registered', sold: 'Sold', died: 'Died', gave_birth: 'Gave birth — now a cow', changed_to_ox: 'Changed to ox', owner_changed: 'Owner changed', edited: 'Edited', corrected: 'Corrected', note: 'Note' };
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const FORMATS = {
+  xlsx: ['Excel', '.xlsx', 'Opens in Excel, and in free apps: Google Sheets, WPS Office, LibreOffice.'],
+  pdf: ['PDF', '.pdf', 'For printing or sending. Opens on any phone or computer, and cannot be changed by mistake.'],
+  csv: ['CSV', '.csv', 'A plain list. Opens in any spreadsheet app and can be loaded into other systems.'],
+};
+const BACKUP_WAYS = {
+  wifi: ['Local Wi-Fi to the farm laptop', 'wifi', ['Switch on the travel router (or a phone hotspot) — no internet is needed.', 'On the farm laptop open Backup & sync — it shows a QR code.', 'Scan that QR code here. Changes go both ways, so the laptop and this device end up the same.']],
+  usb: ['USB flash drive / SD card', 'usb', ['Plug in the flash drive with a USB OTG adapter, or use the SD card.', 'Choose the drive in the save screen — the backup file is written there.', 'On the farm laptop: Backup & sync → Import backup → choose the file.']],
+  cable: ['USB cable to the laptop', 'cable', ['Connect this device to the laptop with its charging cable.', 'On the device choose "File transfer". The backup is in Documents → Dushe backups.', 'On the farm laptop: Backup & sync → Import backup → choose the file on the device.']],
+  bt: ['Bluetooth (Android)', 'bt', ['On the farm laptop: Bluetooth settings → Send or receive files → Receive files.', 'Here: Send → Bluetooth → choose the laptop.', 'On the laptop: Backup & sync → Import backup. Slow for big backups with photos.']],
+};
 
 // ---------- helpers ----------
 const $ = (s) => document.querySelector(s);
@@ -295,7 +489,8 @@ const pad = (n) => String(n).padStart(2, '0');
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 const nowIso = () => new Date().toISOString();
 const fmtDT = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const when = (iso, dateOnly) => (dateOnly ? iso.slice(0, 10) : fmtDT(iso));
+const cap = (s) => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
 const ago = (iso) => {
   if (!iso) return 'never';
   const m = Math.round((Date.now() - new Date(iso)) / 60000);
@@ -303,6 +498,13 @@ const ago = (iso) => {
   const hr = Math.round(m / 60); if (hr < 24) return hr + ' h ago';
   return Math.round(hr / 24) + ' days ago';
 };
+const daysBetween = (from, to) => Math.round((Date.parse(to) - Date.parse(from)) / 86400000);
+const monthYear = (iso) => { try { return new Date(iso).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); } catch (e) { return iso.slice(0, 7); } };
+const sum = (a) => a.reduce((s, x) => s + x, 0);
+const countBy = (list, key) => { const m = {}; for (const x of list) m[x[key]] = (m[x[key]] || 0) + 1; return m; };
+const byCount = (m) => Object.entries(m).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const bar = (a, b) => `<span class="bar"><i style="width:${pct(a, b)}%"></i></span>`;
 const ICONS = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
   list: '<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
@@ -314,38 +516,124 @@ const ICONS = {
   log: '<path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h8M9 17h8"/>',
   sync: '<path d="M20 11a8 8 0 0 0-14-5l-2 2M4 13a8 8 0 0 0 14 5l2-2"/><path d="M4 4v4h4M20 20v-4h-4"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  edit: '<path d="M4 20h4l11-11-4-4L4 16z"/><path d="M13 7l4 4"/>',
+  paper: '<path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6"/><path d="M9 14l2 2 4-4"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  note: '<path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M8 9h8M8 13h5"/>',
+  pdf: '<path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6"/><path d="M9 17v-4h1.5a1.5 1.5 0 0 1 0 3H9"/>',
+  wifi: '<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1"/>',
+  usb: '<rect x="7" y="9" width="10" height="12" rx="2"/><path d="M9 9V3h6v6M11 5v1M13 5v1"/>',
+  cable: '<path d="M7 3v5M11 3v5M5 8h8v4a4 4 0 0 1-8 0zM9 16v2a3 3 0 0 0 3 3h3a3 3 0 0 0 3-3V5"/>',
+  bt: '<path d="M7 7l10 10-5 4V3l5 4L7 17"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
-const swatch = (c, lg) => `<span class="sw${lg ? ' lg' : ''}" style="background:${COLOURS[c] || '#ccc'}" title="${h(cap(c || ''))}"></span>`;
-const tagVis = (a) => { const o = ownerOf(a); const c = o ? o.colour : 'yellow'; return `<span class="tagvis" style="background:${COLOURS[c]};color:${DARK_TEXT.has(c) ? '#111' : '#fff'}">${h(a.tag)}</span>`; };
+const textOn = (c) => (DARK_TEXT.has(c) ? '#111' : '#fff');
+const swatch = (c, lg) => `<span class="sw${lg ? ' lg' : ''}" style="background:${COLOURS[c] || '#ccc'}" title="${h(cap(c))}"></span>`;
+const initials = (name) => { const w = String(name || '?').split(/\s+/).filter((x) => x && !/^(and|&)$/i.test(x)); return (w.length > 1 ? w[0][0] + w[1][0] : (w[0] || '?')[0]).toUpperCase(); };
+const avatar = (o, size = 40) => `<span class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.36)}px;background:${COLOURS[o.colour] || '#9aa9a0'};color:${textOn(o.colour)}">${o.photo ? `<img src="${h(o.photo)}" alt="">` : h(initials(o.name))}</span>`;
+const tagVis = (a) => { const c = a.tagColour || 'yellow'; return `<span class="tagvis" style="background:${COLOURS[c]};color:${textOn(c)}">${h(a.tag)}</span>`; };
 const statusBadge = (a) => `<span class="badge ${a.status}">${a.status === 'active' ? 'Active' : a.status === 'sold' ? 'Sold' : 'Dead'}</span>`;
 
 // ---------- data ----------
 let S;
+const owner = (id) => S.owners.find((o) => o.id === id);
+const ownerOf = (a) => owner(a.ownerId) || { name: '—', colour: 'blue' };
+const ownerName = (id) => (owner(id) || {}).name || '—';
+const byTag = (t) => S.animals.find((a) => a.tag === t);
+const animal = (id) => S.animals.find((a) => a.id === id);
+const session = (id) => S.sessions.find((x) => x.id === id);
+const openSession = () => S.sessions.find((s) => !s.endedAt);
+const sortTag = (a, b) => ownerName(a.ownerId).localeCompare(ownerName(b.ownerId)) || a.tag.localeCompare(b.tag);
+function totals(list) { const t = { cow: 0, heifer: 0, bull: 0, ox: 0, all: 0 }; for (const a of list) if (a.status === 'active') { t[a.category]++; t.all++; } return t; }
+const inGroup = (s, a) => !s.group || ((!s.group.owners || s.group.owners.includes(a.ownerId)) && (!s.group.cats || s.group.cats.includes(a.category)));
+function groupLabel(s) {
+  if (!s.group) return 'all active cattle';
+  const parts = [];
+  if (s.group.owners) parts.push(s.group.owners.map(ownerName).join(', '));
+  if (s.group.cats) parts.push(s.group.cats.map((c) => CATS_PL[c].toLowerCase()).join(', '));
+  return 'group — ' + parts.join(' · ');
+}
+// how far a session is: vaccinated out of the cattle in it, by category and owner
+function progress(s) {
+  const done = new Map(S.vaccinations.filter((v) => v.sessionId === s.id).map((v) => [v.animalId, v]));
+  const target = S.animals.filter((a) => a.status === 'active' && inGroup(s, a));
+  const cats = {}; for (const c of CATS) cats[c] = { done: 0, total: 0 };
+  const owners = {}; for (const o of S.owners) owners[o.id] = { done: 0, total: 0 };
+  const missing = [];
+  for (const a of target) {
+    const d = done.has(a.id);
+    cats[a.category].total++; if (d) cats[a.category].done++;
+    const ow = owners[a.ownerId] || (owners[a.ownerId] = { done: 0, total: 0 });
+    ow.total++; if (d) ow.done++;
+    if (!d) missing.push(a);
+  }
+  const inTarget = new Set(target.map((a) => a.id));
+  return { done: target.length - missing.length, total: target.length, cats, owners, missing: missing.sort(sortTag),
+    extra: [...done.keys()].filter((id) => !inTarget.has(id)).length, paper: [...done.values()].filter((v) => v.source === 'paper').length };
+}
+function lastVacc(a) {
+  let best = null;
+  for (const v of S.vaccinations) if (v.animalId === a.id && (!best || v.at > best.at)) best = v;
+  if (!best) return { vaccine: '', date: '' };
+  return { vaccine: (session(best.sessionId) || {}).vaccine || '', date: best.at.slice(0, 10) };
+}
+
+// export columns the user can tick and put in order
+const COLS = [
+  ['tag', 'Ear tag', (a) => a.tag],
+  ['owner', 'Owner', (a) => ownerName(a.ownerId)],
+  ['tagColour', 'Tag colour', (a) => cap(a.tagColour)],
+  ['breed', 'Breed', (a) => a.breed || ''],
+  ['gender', 'Gender', (a) => cap(a.gender)],
+  ['category', 'Category', (a) => CAT[a.category]],
+  ['status', 'Status', (a) => cap(a.status)],
+  ['statusDate', 'Sold / died on', (a) => a.statusDate || ''],
+  ['description', 'Description', (a) => a.description || ''],
+  ['registered', 'Registered on', (a) => a.createdAt.slice(0, 10)],
+  ['source', 'Entered', (a) => SOURCE[a.source] || ''],
+  ['lastVacc', 'Last vaccine', (a) => lastVacc(a).vaccine],
+  ['lastVaccDate', 'Last vaccinated on', (a) => lastVacc(a).date],
+  ['vaccCount', 'Times vaccinated', (a) => S.vaccinations.filter((v) => v.animalId === a.id).length],
+  ['lastNote', 'Latest note', (a) => { const e = S.events.filter((x) => x.animalId === a.id && x.type === 'note').sort((x, y) => y.at.localeCompare(x.at))[0]; return e ? e.details : ''; }],
+];
+const COL = Object.fromEntries(COLS.map(([k, label, get]) => [k, { label, get }]));
+const DEFAULT_COLS = ['tag', 'owner', 'tagColour', 'breed', 'gender', 'category', 'status', 'description'];
+const defaultCols = () => [...DEFAULT_COLS, ...COLS.map((c) => c[0]).filter((k) => !DEFAULT_COLS.includes(k))].map((k) => ({ k, on: DEFAULT_COLS.includes(k) }));
+
 function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function seed() {
-  const r = mulberry32(20261013);
+  const r = mulberry32(20261019);
   const pick = (arr) => arr[Math.floor(r() * arr.length)];
   const owners = [
-    ['A', 'blue', 'Grandparent — full name to be confirmed'], ['T', 'blue', 'Grandparent — full name to be confirmed'],
-    ['Tracy', 'yellow', ''], ['Sean', 'red', ''], ['Kelly', 'orange', ''], ['Adoltin', 'green', ''], ['Kangoro', 'pink', ''],
-  ].map(([name, colour, notes]) => ({ id: uid(), name, colour, phone: '', notes }));
-  const descs = ['White face', 'Brown with white patch', 'Black', 'Red-brown', 'Short horns', 'Speckled', 'Brahman cross', 'Long horns', '', '', ''];
+    ['A and T', 'blue', 'Grandma and Grandpa — one owner. Full names to be given later.'],
+    ['Tracy', 'yellow', ''], ['Sean', 'red', ''], ['Kelly', 'orange', ''], ['Adoltina', 'green', ''], ['Kangoro', 'pink', ''],
+  ].map(([name, colour, notes]) => ({ id: uid(), name, colour, phone: '', notes, photo: '', createdAt: '2026-01-15T08:00:00.000Z' }));
+  const breedW = [['Brahman', 5], ['Bonsmara', 4], ['Cross-breed', 4], ['Simmentaler', 3], ['Afrikaner', 3], ['Nguni', 2], ['Sanga', 2], ['Simbra', 1]];
+  const bTotal = sum(breedW.map((b) => b[1]));
+  const pickBreed = () => { let x = r() * bTotal; for (const [b, w] of breedW) { x -= w; if (x < 0) return b; } return breedW[0][0]; };
+  const colours = Object.keys(COLOURS);
+  const descs = ['White face', 'Brown with white patch', 'Black', 'Red-brown', 'Short horns', 'Speckled', 'Long horns', '', '', ''];
   const used = new Set(); const animals = []; const events = [];
   const newTag = () => { let t; do { const len = r() < 0.6 ? 8 : 9; t = String(1 + Math.floor(r() * 9)); while (t.length < len) t += Math.floor(r() * 10); } while (used.has(t)); used.add(t); return t; };
   for (const o of owners) {
-    const n = 10 + Math.floor(r() * 9);
+    const n = (o.colour === 'blue' ? 22 : 10) + Math.floor(r() * 9);
     for (let i = 0; i < n; i++) {
       const x = r();
       const category = x < 0.45 ? 'cow' : x < 0.65 ? 'heifer' : x < 0.75 ? 'bull' : 'ox';
       const gender = category === 'cow' || category === 'heifer' ? 'female' : 'male';
       const created = new Date(2026, Math.floor(r() * 9), 1 + Math.floor(r() * 27), 8 + Math.floor(r() * 9), Math.floor(r() * 60)).toISOString();
-      const s = r();
-      const status = s < 0.06 ? 'sold' : s < 0.1 ? 'dead' : 'active';
+      const st = r();
+      const status = st < 0.06 ? 'sold' : st < 0.1 ? 'dead' : 'active';
       const statusDate = status === 'active' ? null : '2026-09-' + pad(1 + Math.floor(r() * 28));
-      const a = { id: uid(), tag: newTag(), ownerId: o.id, gender, category, status, statusDate, description: pick(descs), createdAt: created, updatedAt: created };
+      const tagColour = r() < 0.8 ? o.colour : pick(colours.filter((c) => c !== o.colour));
+      const a = { id: uid(), tag: newTag(), ownerId: o.id, breed: pickBreed(), tagColour, gender, category, status, statusDate,
+        description: pick(descs), source: r() < 0.85 ? 'scan' : 'typed', createdAt: created, updatedAt: created };
       animals.push(a);
-      events.push({ id: uid(), animalId: a.id, type: 'registered', at: created, details: `${CAT[category]}, ${gender}` });
+      events.push({ id: uid(), animalId: a.id, type: 'registered', at: created, details: `${CAT[category]}, ${gender}, ${a.breed}` });
       if (status !== 'active') events.push({ id: uid(), animalId: a.id, type: status === 'sold' ? 'sold' : 'died', at: statusDate + 'T10:00:00.000Z', details: statusDate });
     }
   }
@@ -353,35 +641,39 @@ function seed() {
   [['Limping on the left front leg — check next week', 3], ['Moved to the north camp', 11], ['Very calm, good for handling', 27]].forEach(([t, i]) => {
     if (act[i]) events.push({ id: uid(), animalId: act[i].id, type: 'note', at: '2026-10-0' + (1 + (i % 8)) + 'T09:15:00.000Z', details: t });
   });
-  const ses = { id: uid(), date: '2026-09-14', vaccine: 'Anthrax vaccine', dose: '2 ml', reason: 'Yearly anthrax vaccination', startedAt: '2026-09-14T07:30:00.000Z', endedAt: '2026-09-14T11:45:00.000Z' };
-  const vaccinations = act.filter(() => r() < 0.85).map((a, i) => ({ id: uid(), sessionId: ses.id, animalId: a.id, at: new Date(Date.parse(ses.startedAt) + i * 90000).toISOString() }));
+  const past = { id: uid(), date: '2026-09-14', vaccine: 'Anthrax vaccine', dose: '2 ml', reason: 'Yearly anthrax vaccination', group: null, startedAt: '2026-09-14T07:30:00.000Z', endedAt: '2026-09-14T11:45:00.000Z' };
+  const vaccinations = act.filter(() => r() < 0.85).map((a, i) => ({ id: uid(), sessionId: past.id, animalId: a.id, source: 'scan', at: new Date(Date.parse(past.startedAt) + i * 90000).toISOString() }));
+  const pastCount = vaccinations.length;
+  // a session that is not finished: started two days ago, some cattle scanned, some written on paper when the tablet battery was flat
+  const running = { id: uid(), date: '2026-10-17', vaccine: 'Lumpy skin disease vaccine', dose: '1 ml', reason: 'Yearly vaccination', group: null, startedAt: '2026-10-17T07:10:00.000Z', endedAt: null };
+  const scanned = act.filter(() => r() < 0.4);
+  scanned.forEach((a, i) => vaccinations.push({ id: uid(), sessionId: running.id, animalId: a.id, source: 'scan', at: new Date(Date.parse(running.startedAt) + i * 80000).toISOString() }));
+  const paperDone = act.filter((a) => !scanned.includes(a)).filter((_, i) => i % 6 === 0).slice(0, 9);
+  paperDone.forEach((a) => vaccinations.push({ id: uid(), sessionId: running.id, animalId: a.id, source: 'paper', at: '2026-10-18T12:00:00.000Z' }));
   const audit = [
-    { id: uid(), at: '2026-09-14T07:30:00.000Z', device: 'Android phone', action: 'session.started', details: 'Anthrax vaccine, 2 ml' },
-    { id: uid(), at: '2026-09-14T11:45:00.000Z', device: 'Android phone', action: 'session.ended', details: `Anthrax vaccine — ${vaccinations.length} vaccinated` },
-    { id: uid(), at: '2026-09-28T12:05:00.000Z', device: 'Android phone', action: 'sync', details: 'Synced (pretend)' },
-    { id: uid(), at: '2026-10-11T17:20:00.000Z', device: 'Android phone', action: 'backup', details: 'Backed up to farm laptop (pretend)' },
-  ];
-  return { farm: { name: 'Dushe the White Hachienda', number: '' }, owners, animals, events, sessions: [ses], vaccinations, audit,
-    pending: 0, lastBackup: '2026-10-11T17:20:00.000Z', lastSync: '2026-09-28T12:05:00.000Z', online: false, device: 'Android phone' };
+    ['2026-09-14T07:30:00.000Z', 'Android phone', 'session.started', 'Anthrax vaccine, 2 ml — all active cattle'],
+    ['2026-09-14T11:45:00.000Z', 'Android phone', 'session.ended', `Anthrax vaccine — ${pastCount} vaccinated`],
+    ['2026-09-28T12:05:00.000Z', 'Android phone', 'sync', 'Synced (pretend)'],
+    ['2026-10-11T17:20:00.000Z', 'Android phone', 'backup', 'Backed up — Local Wi-Fi to the farm laptop (pretend)'],
+    ['2026-10-17T07:10:00.000Z', 'Android tablet', 'session.started', 'Lumpy skin disease vaccine, 1 ml — all active cattle'],
+    ['2026-10-18T19:30:00.000Z', 'Android tablet', 'session.paper', `Lumpy skin disease vaccine — ${paperDone.length} added from paper notes (vaccinated 2026-10-18): ${paperDone.map((a) => a.tag).join(', ')}`],
+  ].map(([at, device, action, details]) => ({ id: uid(), at, device, action, details }));
+  return { farm: { name: 'Dushe The White Hacienda', number: '' }, owners, breeds: SAMPLE_BREEDS.slice(), animals, events, sessions: [past, running], vaccinations, audit,
+    exportCols: defaultCols(), exportFmt: 'xlsx', pending: scanned.length + 2, lastBackup: '2026-10-11T17:20:00.000Z', lastBackupWay: 'wifi',
+    lastSync: '2026-09-28T12:05:00.000Z', online: false, device: 'Android tablet' };
 }
-function load() { try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); return; } } catch (e) {} S = seed(); save(); }
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); if (!S.exportCols) S.exportCols = defaultCols(); return; } } catch (e) {}
+  S = seed(); save();
+}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-
-const ownerOf = (a) => S.owners.find((o) => o.id === a.ownerId);
-const ownerName = (id) => (S.owners.find((o) => o.id === id) || {}).name || '—';
-const byTag = (t) => S.animals.find((a) => a.tag === t);
-const animal = (id) => S.animals.find((a) => a.id === id);
-const openSession = () => S.sessions.find((s) => !s.endedAt);
-const sessionCount = (s) => S.vaccinations.filter((v) => v.sessionId === s.id).length;
-const sortTag = (a, b) => ownerName(a.ownerId).localeCompare(ownerName(b.ownerId)) || a.tag.localeCompare(b.tag);
-function totals(list) { const t = { cow: 0, heifer: 0, bull: 0, ox: 0, all: 0 }; for (const a of list) if (a.status === 'active') { t[a.category]++; t.all++; } return t; }
 
 // ---------- business rules (policy as code) ----------
 class RuleError extends Error { constructor(id, text) { super(`${text} (${id})`); this.id = id; } }
 const RULES = {
   'POL-01': ['An ear tag number has 8 or 9 digits', (tag) => /^\d{8,9}$/.test(tag)],
   'POL-02': ['This ear tag number is already registered', (tag) => !byTag(tag)],
-  'POL-03': ['Choose the owner, gender and category', (f) => f.ownerId && f.gender && f.category],
+  'POL-03': ['Choose the owner, breed, gender and category', (f) => f.ownerId && f.breed && f.gender && f.category],
   'POL-04': ['The category must match the gender', (f) => (GENDER_CATS[f.gender] || []).includes(f.category)],
   'POL-06': ['Only a heifer can be recorded as giving birth', (a) => a.category === 'heifer'],
   'POL-07': ['Only a bull can be changed to an ox', (a) => a.category === 'bull'],
@@ -390,45 +682,53 @@ const RULES = {
   'POL-12': ['Enter the date and the vaccine / medicine name', (f) => f.date && f.vaccine.trim()],
   'POL-15': ['An owner needs a name and a tag colour', (f) => f.name.trim() && f.colour],
   'POL-16': ['Give a reason to correct a mistake', (x) => x.a.status !== 'active' && x.reason.trim()],
+  'POL-17': ['Choose the colour of this ear tag', (f) => !!COLOURS[f.tagColour]],
+  'POL-18': ['Type a breed name that is not in the list yet', (name) => !!String(name || '').trim() && !S.breeds.some((b) => b.toLowerCase() === String(name).trim().toLowerCase())],
+  'POL-19': ['Enter the date it happened (from the paper notes)', (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || '')],
 };
 function rule(id, x) { const [text, ok] = RULES[id]; if (!ok(x)) throw new RuleError(id, text); }
 
 // ---------- actions (every change is audited and waits for sync) ----------
 function log(action, details, counts = true) { S.audit.push({ id: uid(), at: nowIso(), device: S.device, action, details }); if (counts) S.pending++; save(); }
-function addEvent(a, type, details) { S.events.push({ id: uid(), animalId: a.id, type, at: nowIso(), details: details || '' }); }
+function addEvent(a, type, details, at) { S.events.push({ id: uid(), animalId: a.id, type, at: at || nowIso(), details: details || '' }); }
 const Act = {
   register(f) {
-    rule('POL-01', f.tag); rule('POL-02', f.tag); rule('POL-03', f); rule('POL-04', f);
-    const a = { id: uid(), tag: f.tag, ownerId: f.ownerId, gender: f.gender, category: f.category, status: 'active', statusDate: null,
-      description: (f.description || '').trim(), createdAt: nowIso(), updatedAt: nowIso() };
+    rule('POL-01', f.tag); rule('POL-02', f.tag); rule('POL-03', f); rule('POL-04', f); rule('POL-17', f);
+    if (f.paper) rule('POL-19', f.date);
+    const at = f.paper ? `${f.date}T12:00:00.000Z` : nowIso();
+    const a = { id: uid(), tag: f.tag, ownerId: f.ownerId, breed: f.breed, tagColour: f.tagColour, gender: f.gender, category: f.category, status: 'active', statusDate: null,
+      description: (f.description || '').trim(), source: f.paper ? 'paper' : f.source || 'typed', createdAt: at, updatedAt: nowIso() };
     S.animals.push(a);
-    addEvent(a, 'registered', `${CAT[a.category]}, ${a.gender}`);
-    log('animal.registered', `${a.tag} — ${ownerName(a.ownerId)}, ${cap(a.gender)}, ${CAT[a.category]}`);
+    addEvent(a, 'registered', `${CAT[a.category]}, ${a.gender}, ${a.breed}${f.paper ? ' — from paper notes' : ''}`, at);
+    log('animal.registered', `${a.tag} — ${ownerName(a.ownerId)}, ${a.breed}, ${cap(a.tagColour)} tag, ${cap(a.gender)}, ${CAT[a.category]}${f.paper ? ` (from paper notes, ${f.date})` : ''}`);
     return a;
   },
-  setStatus(a, status, date) {
+  setStatus(a, status, date, paper) {
     rule('POL-08', a);
     a.status = status; a.statusDate = date; a.updatedAt = nowIso();
-    addEvent(a, status === 'sold' ? 'sold' : 'died', date);
-    log(`animal.${status === 'sold' ? 'sold' : 'died'}`, `${a.tag} — ${ownerName(a.ownerId)}, ${CAT[a.category]} (${date})`);
+    addEvent(a, status === 'sold' ? 'sold' : 'died', date + (paper ? ' — from paper notes' : ''));
+    log(`animal.${status === 'sold' ? 'sold' : 'died'}`, `${a.tag} — status: active → ${status} (${date}${paper ? ', from paper notes' : ''})`);
   },
   gaveBirth(a, date) {
     rule('POL-08', a); rule('POL-06', a);
     a.category = 'cow'; a.updatedAt = nowIso();
     addEvent(a, 'gave_birth', `Heifer → cow (${date})`);
-    log('animal.gave_birth', `${a.tag} — heifer is now a cow`);
+    log('animal.gave_birth', `${a.tag} — category: heifer → cow (${date})`);
   },
   toOx(a) {
     rule('POL-08', a); rule('POL-07', a);
     a.category = 'ox'; a.updatedAt = nowIso();
     addEvent(a, 'changed_to_ox', 'Bull → ox');
-    log('animal.changed_to_ox', `${a.tag} — bull changed to ox`);
+    log('animal.changed_to_ox', `${a.tag} — category: bull → ox`);
   },
   edit(a, f) {
-    const changes = [];
-    if (f.ownerId !== a.ownerId) { const t = `${ownerName(a.ownerId)} → ${ownerName(f.ownerId)}`; changes.push('owner ' + t); a.ownerId = f.ownerId; addEvent(a, 'owner_changed', t); }
-    if ((f.description || '') !== (a.description || '')) { changes.push('description'); a.description = f.description; addEvent(a, 'edited', 'Description changed'); }
-    if (changes.length) { a.updatedAt = nowIso(); log('animal.edited', `${a.tag} — ${changes.join(', ')}`); }
+    const ch = [];
+    if (f.ownerId !== a.ownerId) { const t = `${ownerName(a.ownerId)} → ${ownerName(f.ownerId)}`; ch.push('owner: ' + t); addEvent(a, 'owner_changed', t); a.ownerId = f.ownerId; }
+    if (f.breed !== a.breed) { const t = `${a.breed || '—'} → ${f.breed}`; ch.push('breed: ' + t); addEvent(a, 'edited', 'Breed ' + t); a.breed = f.breed; }
+    if (f.tagColour !== a.tagColour) { const t = `${cap(a.tagColour)} → ${cap(f.tagColour)}`; ch.push('tag colour: ' + t); addEvent(a, 'edited', 'Tag colour ' + t); a.tagColour = f.tagColour; }
+    if ((f.description || '') !== (a.description || '')) { ch.push(`description: "${a.description || ''}" → "${f.description}"`); addEvent(a, 'edited', 'Description changed'); a.description = f.description; }
+    if (ch.length) { a.updatedAt = nowIso(); log('animal.edited', `${a.tag} — ${ch.join('; ')}`); }
+    return ch.length;
   },
   note(a, text) { if (!text.trim()) return; addEvent(a, 'note', text.trim()); log('animal.note', `${a.tag} — note added`); },
   correct(a, reason) {
@@ -436,59 +736,121 @@ const Act = {
     const from = a.status;
     a.status = 'active'; a.statusDate = null; a.updatedAt = nowIso();
     addEvent(a, 'corrected', `${from} → active: ${reason.trim()}`);
-    log('animal.corrected', `${a.tag} — ${from} → active: "${reason.trim()}"`);
+    log('animal.corrected', `${a.tag} — status: ${from} → active, reason: "${reason.trim()}"`);
   },
   saveOwner(id, f) {
     rule('POL-15', f);
-    if (id) { const o = S.owners.find((x) => x.id === id); Object.assign(o, f); log('owner.updated', `${o.name}`); return o; }
-    const o = { id: uid(), ...f }; S.owners.push(o); log('owner.added', `${o.name} — ${o.colour}`); return o;
+    if (id) {
+      const o = owner(id); const ch = [];
+      for (const [k, label] of [['name', 'name'], ['colour', 'tag colour'], ['phone', 'phone'], ['notes', 'notes']]) if ((o[k] || '') !== (f[k] || '')) ch.push(`${label}: "${o[k] || ''}" → "${f[k]}"`);
+      Object.assign(o, f);
+      if (ch.length) log('owner.updated', `${o.name} — ${ch.join('; ')}`);
+      return o;
+    }
+    const o = { id: uid(), photo: '', createdAt: nowIso(), ...f }; S.owners.push(o); log('owner.added', `${o.name} — ${o.colour} tags`); return o;
   },
+  setPhoto(o, data) { o.photo = data; log('owner.photo', `${o.name} — ${data ? 'picture changed' : 'picture removed'}`); },
+  addBreed(name) { rule('POL-18', name); const b = String(name).trim(); S.breeds.push(b); S.breeds.sort((x, y) => x.localeCompare(y)); log('breed.added', b); return b; },
   startSession(f) {
     rule('POL-12', f);
-    if (openSession()) throw new Error('A session is already running');
-    const s = { id: uid(), date: f.date, vaccine: f.vaccine.trim(), dose: f.dose.trim(), reason: f.reason.trim(), startedAt: nowIso(), endedAt: null };
-    S.sessions.push(s); log('session.started', `${s.vaccine}${s.dose ? ', ' + s.dose : ''}`);
+    if (openSession()) throw new Error('A session is already running — end it first');
+    const s = { id: uid(), date: f.date, vaccine: f.vaccine.trim(), dose: f.dose.trim(), reason: f.reason.trim(), group: f.group || null, startedAt: nowIso(), endedAt: null };
+    S.sessions.push(s); log('session.started', `${s.vaccine}${s.dose ? ', ' + s.dose : ''} — ${groupLabel(s)}`);
     return s;
   },
-  vaccinate(s, a) {
+  vaccinate(s, a, source, at) {
     if (a.status !== 'active') throw new RuleError('POL-11', `${a.tag} is ${a.status} — skipped`);
     rule('POL-11', { s, a });
-    S.vaccinations.push({ id: uid(), sessionId: s.id, animalId: a.id, at: nowIso() });
-    log('animal.vaccinated', `${a.tag} — ${s.vaccine}`);
+    S.vaccinations.push({ id: uid(), sessionId: s.id, animalId: a.id, source: source || 'scan', at: at || nowIso() });
+    if (source !== 'paper') log('animal.vaccinated', `${a.tag} — ${s.vaccine}`);
   },
-  endSession(s) { s.endedAt = nowIso(); log('session.ended', `${s.vaccine} — ${sessionCount(s)} vaccinated`); },
-  backup() { S.lastBackup = nowIso(); log('backup', 'Backed up to farm laptop (pretend)', false); },
+  addPaper(s, list, date) {
+    rule('POL-19', date);
+    const at = `${date}T12:00:00.000Z`; const added = [];
+    for (const a of list) { try { Act.vaccinate(s, a, 'paper', at); added.push(a.tag); } catch (e) { /* skipped: already done or not active */ } }
+    log('session.paper', `${s.vaccine} — ${added.length} added from paper notes (vaccinated ${date}): ${added.join(', ')}`);
+    return added.length;
+  },
+  endSession(s) { s.endedAt = nowIso(); const p = progress(s); log('session.ended', `${s.vaccine} — ${p.done} of ${p.total} vaccinated`); },
+  backup(way) { S.lastBackup = nowIso(); S.lastBackupWay = way; log('backup', `Backed up — ${BACKUP_WAYS[way][0]} (pretend)`, false); },
   sync() {
     if (!S.online) throw new Error('No internet — sync when you are in town');
     const n = S.pending; S.pending = 0; S.lastSync = nowIso();
     log('sync', `${n} changes sent (pretend — sync method to be decided)`, false);
     return n;
   },
-  saveFarm(f) { S.farm.name = f.name.trim() || S.farm.name; S.farm.number = f.number.trim(); S.device = f.device; log('farm.updated', `${S.farm.name} — ${S.farm.number || 'no farm number'}`); },
+  saveFarm(f) {
+    const ch = [];
+    if (f.name.trim() && f.name.trim() !== S.farm.name) ch.push(`name: "${S.farm.name}" → "${f.name.trim()}"`);
+    if (f.number.trim() !== (S.farm.number || '')) ch.push(`farm number: "${S.farm.number || ''}" → "${f.number.trim()}"`);
+    S.farm.name = f.name.trim() || S.farm.name; S.farm.number = f.number.trim(); S.device = f.device;
+    log('farm.updated', ch.length ? ch.join('; ') : `This device: ${S.device}`);
+  },
 };
 
 // ---------- view state ----------
-const UI = { cf: { q: '', status: 'active', cat: 'all', owner: 'all' }, of: { id: null, cat: 'all', q: '', inactive: false }, ex: null, nf: null, read: null, result: null };
+const UI = { cf: { q: '', status: 'active', cat: 'all', owner: 'all', breed: 'all' }, of: { id: null, tab: 'cattle', cat: 'all', q: '', inactive: false },
+  ex: null, nf: null, vn: null, paper: null, read: null, lastRead: null, result: null, typed: '', missOpen: false };
 let VIEW = 'phone';
+const wide = () => VIEW !== 'phone';
+const hasCam = () => VIEW !== 'desktop';
+const blankNf = (o) => ({ key: '', tag: '', fixedTag: false, ownerId: '', breed: '', tagColour: '', colourAuto: false, gender: '', category: '', description: '',
+  paper: false, date: today(), vacc: false, source: 'typed', returnTo: '', addingBreed: false, newBreed: '', err: '', ...o });
 
 // ---------- shells ----------
 const NAV = [['home', 'Home', 'home'], ['cattle', 'Cattle', 'list'], ['scan', 'Scan', 'scan'], ['owners', 'Owners', 'users'], ['more', 'More', 'more']];
-const SIDE = [['home', 'Home', 'home'], ['scan', 'Enter ear tag', 'scan'], ['cattle', 'Cattle', 'list'], ['owners', 'Owners', 'users'],
-  ['vacc', 'Vaccination', 'syringe'], ['export', 'Export to Excel', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings', 'gear']];
+const sideItems = () => [['home', 'Home', 'home'], ['scan', hasCam() ? 'Scan ear tag' : 'Enter ear tag', 'scan'], ['new', 'Add new animal', 'plus'], ['cattle', 'Cattle', 'list'],
+  ['owners', 'Owners', 'users'], ['vacc', 'Vaccination', 'syringe'], ['export', 'Export', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings', 'gear']];
+const sectOf = (sect) => ({ animal: 'cattle', owner: 'owners' }[sect] || sect);
 const netPill = () => `<span class="net ${S.online ? 'on' : ''}">${S.online ? 'Online' : 'Offline'}</span>`;
 function phoneShell(v, sect) {
-  return `<header class="hdr">${v.back ? `<a class="back" href="${v.back}" aria-label="Back">‹</a>` : ''}<div class="ttl">${v.title}</div>${netPill()}</header>
+  const cur = sectOf(sect) === 'new' ? 'scan' : sectOf(sect);
+  return `<header class="hdr">${v.back ? `<a class="back" href="${v.back}" aria-label="Back">‹</a>` : ''}<div class="ttl">${h(v.title)}</div>${netPill()}</header>
   <main class="main">${v.body}</main>
   <nav class="tabs">${NAV.map(([k, label, ic]) => k === 'scan'
     ? `<a href="#/scan" class="scanbtn"><span class="ic">${icon(ic)}</span><span>${label}</span></a>`
-    : `<a href="#/${k}" class="${sect === k || (k === 'more' && ['vacc', 'export', 'audit', 'sync', 'settings'].includes(sect)) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')}</nav>`;
+    : `<a href="#/${k}" class="${cur === k || (k === 'more' && ['vacc', 'export', 'audit', 'sync', 'settings'].includes(cur)) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')}</nav>`;
 }
-function desktopShell(v, sect) {
-  return `<aside class="side"><div class="brand">Dushe<small>the White Hachienda</small></div>
-  ${SIDE.map(([k, label, ic]) => `<a href="#/${k}" class="${sect === k || (sect === 'animal' && k === 'cattle') || (sect === 'owner' && k === 'owners') || (sect === 'new' && k === 'scan') ? 'on' : ''}">${icon(ic)}${label}</a>`).join('')}
-  <div class="foot">${S.online ? 'Online' : 'Offline — no internet'}<br>${S.pending} changes waiting to sync<br>Backup: ${ago(S.lastBackup)}</div></aside>
-  <section class="content"><header class="hdr">${v.back ? `<a class="back" href="${v.back}">‹</a>` : ''}<div class="ttl">${v.title}</div>${netPill()}</header><main class="main">${v.body}</main></section>`;
+function sideShell(v, sect) {
+  const cur = sectOf(sect);
+  const [first, ...rest] = S.farm.name.split(' ');
+  return `<aside class="side"><div class="brand">${h(first)}<small>${h(rest.join(' '))}</small></div>
+  ${sideItems().map(([k, label, ic]) => `<a href="#/${k}" class="${cur === k ? 'on' : ''}">${icon(ic)}${label}</a>`).join('')}
+  <div class="foot">${S.online ? 'Online' : 'Offline — no internet'}<br>${S.pending} changes waiting to sync<br>Backup: ${ago(S.lastBackup)}<br>This device: ${h(S.device)}</div></aside>
+  <section class="content"><header class="hdr">${v.back ? `<a class="back" href="${v.back}">‹</a>` : ''}<div class="ttl">${h(v.title)}</div>${netPill()}</header><main class="main">${v.body}</main></section>`;
 }
+
+// ---------- pieces used on several screens ----------
+function sessionBanner(s) {
+  const p = progress(s);
+  return `<a class="banner" href="#/vacc/${s.id}">Vaccination running: <b>${h(s.vaccine)}</b> — ${p.done} of ${p.total} done (${pct(p.done, p.total)}%)${bar(p.done, p.total)}<u>Continue ›</u></a>`;
+}
+function scanPanel(s) {
+  const r = UI.read; const res = UI.result;
+  return `<div>
+    ${hasCam() ? `<div class="viewfinder"><div class="tagframe">ear tag</div><div class="scanline"></div><div class="vf-hint">Point the camera at the ear tag</div></div>
+      <div class="proto">Prototype: these buttons pretend the camera read a tag. The camera reads the number and the tag's colour — the owner is always chosen by hand.</div>
+      <div class="btnrow"><button class="btn" onclick="App.fakeRead('known')">Read a known tag</button><button class="btn" onclick="App.fakeRead('new')">Read a new tag</button></div>`
+    : '<div class="proto">On the desktop the ear tag is typed — there is no camera scanning.</div>'}
+    ${r ? `<div class="readcard"><div class="muted small">Read by the camera</div><div class="num mono">${h(r.tag)}</div><div class="small">Tag colour: ${swatch(r.colour)} ${cap(r.colour)}</div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn pri" onclick="App.confirmRead()">Confirm</button><button class="btn" onclick="App.correctRead()">Correct it</button></div></div>` : ''}
+    ${res ? `<div class="${res.kind}">${h(res.text)}</div>` : ''}
+    <label class="lbl">${hasCam() ? 'Or type the ear tag number' : 'Ear tag number'}</label>
+    <div class="inrow"><input id="tagin" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(UI.typed)}" onkeydown="if(event.key==='Enter')App.lookup()"><button class="btn pri" onclick="App.lookup()">Find</button></div>
+    <div class="hint">${s ? 'A known tag is marked vaccinated. A new tag is registered first.' : 'A known tag opens the animal’s record. A new tag asks for its details.'}
+      <a class="linkbtn" href="#/new">Add a new animal without scanning</a></div>
+  </div>`;
+}
+function vRow(v) {
+  const a = animal(v.animalId); if (!a) return '';
+  return `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span>${v.source === 'paper' ? `<span class="src">paper · ${v.at.slice(5, 10)}</span>` : `<span class="small muted">${fmtDT(v.at).slice(5)}</span>`}</a>`;
+}
+function lastEntered(s, n) {
+  const vs = S.vaccinations.filter((v) => v.sessionId === s.id).slice(-n).reverse();
+  return `<div class="card"><div class="card-h">Last entered <small>${h(s.vaccine)}</small></div>${vs.map(vRow).join('') || '<div class="empty">Nothing yet.</div>'}</div>`;
+}
+const breedSelect = (id, val, onchange) => `<select id="${id}" onchange="${onchange}"><option value="">Choose the breed…</option>${S.breeds.map((b) => `<option value="${h(b)}" ${b === val ? 'selected' : ''}>${h(b)}</option>`).join('')}<option value="__add" ${val === '__add' ? 'selected' : ''}>+ Add a new breed…</option></select>`;
+const ownerSelect = (id, val, onchange) => `<select id="${id}" ${onchange ? `onchange="${onchange}"` : ''}><option value="">Choose the owner…</option>${S.owners.map((o) => `<option value="${o.id}" ${o.id === val ? 'selected' : ''}>${h(o.name)} — ${o.colour} tags</option>`).join('')}</select>`;
 
 // ---------- screens ----------
 const Screens = {
@@ -498,72 +860,79 @@ const Screens = {
       <div class="farm"><div class="fname">${h(S.farm.name)}</div><div class="fnum">Farm number: ${S.farm.number ? h(S.farm.number) : '<i>not set</i>'}</div></div>
       <div class="status"><span class="pill ${S.online ? 'on' : 'off'}">${S.online ? 'Online' : 'Offline — no internet'}</span>
         <span class="pill">${S.pending} changes waiting to sync</span><span class="pill">Backup: ${ago(S.lastBackup)}</span></div>
-      ${s ? `<a class="banner" href="#/vacc/${s.id}">Vaccination running: <b>${h(s.vaccine)}</b> — ${sessionCount(s)} done. <u>Continue ›</u></a>` : ''}
-      <a class="bigscan" href="#/scan">${icon('scan')} ${VIEW === 'desktop' ? 'Enter ear tag' : 'Scan ear tag'}</a>
+      ${s ? sessionBanner(s) : ''}
+      <div class="homebtns"><a class="bigscan" href="#/scan">${icon('scan')} ${hasCam() ? 'Scan ear tag' : 'Enter ear tag'}</a><a class="btn block" href="#/new">${icon('plus')} Add new animal</a></div>
       <div class="dash">
         <div class="card"><div class="card-h">Active cattle <span class="big" style="font-size:28px">${t.all}</span></div>
           <div class="grid4">${CATS.map((c) => `<a class="stat" href="#/cattle?cat=${c}"><b>${t[c]}</b><span>${CATS_PL[c]}</span></a>`).join('')}</div>
           <div class="hint">Sold and dead cattle are kept but not counted.</div></div>
-        <div class="card"><div class="card-h">By owner <small>active</small></div>
-          ${S.owners.map((o) => `<a class="row" href="#/owner/${o.id}">${swatch(o.colour, 1)}<span class="grow">${h(o.name)}</span><b>${totals(S.animals.filter((a) => a.ownerId === o.id)).all}</b><span class="chev">›</span></a>`).join('')}</div>
+        <div class="card"><div class="card-h">Owners <small>active cattle</small></div>
+          ${S.owners.map((o) => `<a class="row" href="#/owner/${o.id}">${avatar(o, 36)}<span class="grow"><b>${h(o.name)}</b><br><span class="small muted">${cap(o.colour)} tags</span></span><b>${totals(S.animals.filter((a) => a.ownerId === o.id)).all}</b><span class="chev">›</span></a>`).join('')}</div>
       </div>
-      ${VIEW === 'phone' ? `<div class="btnrow" style="margin-top:4px"><a class="btn" href="#/vacc">${icon('syringe').replace('<svg', '<svg width="18" height="18"')} Vaccination</a><a class="btn" href="#/export">Export to Excel</a></div>` : ''}` };
+      ${VIEW === 'phone' ? `<div class="btnrow" style="margin-top:4px"><a class="btn" href="#/vacc">${icon('syringe')} Vaccination</a><a class="btn" href="#/export">${icon('sheet')} Export</a></div>` : ''}` };
   },
 
   scan() {
-    const s = openSession(); const cam = VIEW === 'phone';
-    const r = UI.read; const res = UI.result;
-    const last = s ? S.vaccinations.filter((v) => v.sessionId === s.id).slice(-4).reverse() : [];
-    return { title: s ? 'Scan — vaccination' : cam ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
-      ${s ? `<div class="banner">Vaccination session: <b>${h(s.vaccine)}</b> — known ear tags are marked vaccinated. <a href="#/vacc/${s.id}">Session (${sessionCount(s)}) ›</a></div>` : ''}
-      ${cam ? `<div class="viewfinder"><div class="tagframe">ear tag</div><div class="scanline"></div><div class="vf-hint">Point the camera at the ear tag</div></div>
-        <div class="proto">Prototype: these buttons pretend the camera read a tag.</div>
-        <div class="btnrow"><button class="btn" onclick="App.fakeRead('known')">Read a known tag</button><button class="btn" onclick="App.fakeRead('new')">Read a new tag</button></div>`
-      : `<div class="proto">On the desktop the ear tag is typed — there is no camera scanning.</div>`}
-      ${r ? `<div class="readcard"><div class="muted small">Number read by the camera</div><div class="num mono">${h(r)}</div>
-        <div class="btnrow" style="margin-top:8px"><button class="btn pri" onclick="App.confirmRead()">Confirm</button><button class="btn" onclick="App.correctRead()">Correct it</button></div></div>` : ''}
-      ${res ? `<div class="${res.kind}">${h(res.text)}</div>` : ''}
-      <label class="lbl">${cam ? 'Or type the ear tag number' : 'Ear tag number'}</label>
-      <div class="inrow"><input id="tagin" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(UI.typed || '')}" onkeydown="if(event.key==='Enter')App.lookup()"><button class="btn pri" onclick="App.lookup()">Find</button></div>
-      ${last.length ? `<div class="card" style="margin-top:14px"><div class="card-h">Last vaccinated <small>${h(s.vaccine)}</small></div>
-        ${last.map((v) => { const a = animal(v.animalId); return `<a class="row" href="#/animal/${a.id}">${swatch(ownerOf(a).colour)}<span class="mono">${h(a.tag)}</span><span class="grow muted small">${CAT[a.category]} · ${h(ownerName(a.ownerId))}</span><span class="badge active">✓</span></a>`; }).join('')}</div>` : ''}` };
+    const s = openSession();
+    return { title: s ? 'Scan — vaccination' : hasCam() ? 'Scan ear tag' : 'Enter ear tag', back: '#/home', body: `
+      ${s ? `<div class="banner">Vaccination session: <b>${h(s.vaccine)}</b> — known ear tags are marked vaccinated. <a href="#/vacc/${s.id}">Session progress ›</a></div>` : ''}
+      <div class="${wide() ? 'dash' : ''}">${scanPanel(s)}${s ? `<div>${lastEntered(s, 6)}</div>` : ''}</div>` };
   },
 
-  new([tag]) {
+  new([tag], q) {
     const s = openSession();
-    if (!UI.nf || UI.nf.tag !== tag) UI.nf = { tag, ownerId: '', gender: '', category: '', description: '', err: '' };
-    const f = UI.nf;
-    return { title: 'New animal', back: '#/scan', body: `<div class="narrow">
-      <div class="card"><div class="muted small">Ear tag</div><div class="readcard" style="margin:6px 0 4px;border-style:dashed"><div class="num mono">${h(tag)}</div></div>
-        <div class="small muted">This ear tag is not in the system yet. Enter the details.</div></div>
+    const key = (tag || '') + '|' + (q.get('owner') || '');
+    if (!UI.nf || UI.nf.key !== key) {
+      const read = UI.lastRead && UI.lastRead.tag === tag ? UI.lastRead : null;
+      UI.nf = blankNf({ key, tag: tag || '', fixedTag: !!tag, ownerId: owner(q.get('owner')) ? q.get('owner') : '', tagColour: read ? read.colour : '', vacc: !!(s && tag), source: read ? 'scan' : 'typed' });
+      if (UI.nf.ownerId && !UI.nf.tagColour) { UI.nf.tagColour = owner(UI.nf.ownerId).colour; UI.nf.colourAuto = true; }
+    }
+    const f = UI.nf; const o = owner(f.ownerId);
+    const cancel = f.returnTo || (f.fixedTag ? '#/scan' : '#/home');
+    return { title: f.fixedTag ? 'New animal' : 'Add new animal', back: cancel, body: `<div class="narrow">
+      <div class="card">${f.fixedTag
+        ? `<div class="muted small">Ear tag</div><div class="readcard" style="margin:6px 0 4px;border-style:dashed"><div class="num mono">${h(f.tag)}</div></div><div class="small muted">This ear tag is not in the system yet. Enter the details.</div>`
+        : `<label class="lbl" style="margin-top:0">Ear tag number</label><input id="nftag" class="mono" inputmode="numeric" maxlength="12" placeholder="8 or 9 digits" value="${h(f.tag)}"><div class="hint">No scanning needed — type the number from the tag or from the paper notes.</div>`}</div>
       <label class="lbl">Owner</label>
-      <div class="chips">${S.owners.map((o) => `<button class="chip ${f.ownerId === o.id ? 'sel' : ''}" onclick="App.nf('ownerId','${o.id}')">${swatch(o.colour)}${h(o.name)}</button>`).join('')}</div>
+      <div class="inrow">${o ? avatar(o, 44) : ''}${ownerSelect('nfowner', f.ownerId, "App.nf('ownerId',this.value)")}</div>
+      <div class="hint">Tag colours are mixed, so the owner is chosen here — never from the tag colour.</div>
+      <label class="lbl">Breed</label>
+      ${breedSelect('nfbreed', f.addingBreed ? '__add' : f.breed, 'App.nfBreed(this.value)')}
+      ${f.addingBreed ? `<div class="inrow" style="margin-top:8px"><input id="nfnewbreed" placeholder="Name of the new breed" value="${h(f.newBreed)}"><button class="btn pri" onclick="App.nfAddBreed()">Add</button></div><div class="hint">The new breed is added to the list for next time.</div>` : ''}
+      <label class="lbl">Colour of this ear tag</label>
+      <div class="chips">${Object.keys(COLOURS).map((c) => `<button class="chip ${f.tagColour === c ? 'sel' : ''}" onclick="App.nf('tagColour','${c}')">${swatch(c)}${cap(c)}</button>`).join('')}</div>
+      <div class="hint">${f.colourAuto && o ? `Set to ${h(o.name)}'s usual colour — change it if this tag is a different colour.` : f.source === 'scan' && f.tagColour ? 'Read by the camera — change it if it is wrong.' : 'The colour of the tag in the ear. It is recorded, not used to choose the owner.'}</div>
       <label class="lbl">Gender</label>
       <div class="seg2"><button class="${f.gender === 'male' ? 'sel' : ''}" onclick="App.nf('gender','male')">Male</button><button class="${f.gender === 'female' ? 'sel' : ''}" onclick="App.nf('gender','female')">Female</button></div>
       <label class="lbl">Category</label>
       ${f.gender ? `<div class="seg2">${GENDER_CATS[f.gender].map((c) => `<button class="${f.category === c ? 'sel' : ''}" onclick="App.nf('category','${c}')">${CAT[c]}</button>`).join('')}</div>
-        <div class="hint">A newly tagged calf is a ${f.gender === 'male' ? 'bull' : 'heifer'}. When entering the existing herd, grown animals can be ${f.gender === 'male' ? 'oxen' : 'cows'}.</div>`
+        <div class="hint">A newly tagged calf is a ${f.gender === 'male' ? 'bull' : 'heifer'}. Grown animals of the herd can be ${f.gender === 'male' ? 'oxen' : 'cows'}.</div>`
       : '<div class="hint">Choose the gender first.</div>'}
       <label class="lbl">Description <span class="opt">(optional)</span></label>
       <textarea id="nfdesc" placeholder="e.g. white face, short horns">${h(f.description)}</textarea>
-      ${s ? `<div class="proto">A vaccination session is running — this animal will also be marked vaccinated (${h(s.vaccine)}).</div>` : ''}
+      <label class="switch"><span>Written on paper earlier — entered now</span><input type="checkbox" ${f.paper ? 'checked' : ''} onchange="App.nf('paper',this.checked)"></label>
+      ${f.paper ? `<label class="lbl" style="margin-top:4px">Date it happened</label><input id="nfdate" type="date" value="${h(f.date)}">` : ''}
+      ${s && !f.returnTo ? `<label class="switch"><span>Mark vaccinated in the running session (${h(s.vaccine)})</span><input type="checkbox" ${f.vacc ? 'checked' : ''} onchange="App.nf('vacc',this.checked)"></label>` : ''}
+      ${f.returnTo ? '<div class="proto">From a session’s paper notes — after saving you go back to the paper list to finish.</div>' : ''}
       ${f.err ? `<div class="err">${h(f.err)}</div>` : ''}
-      <div class="btnrow" style="margin-top:16px"><a class="btn" href="#/scan">Cancel</a><button class="btn pri" onclick="App.saveNew()">Save animal</button></div></div>` };
+      <div class="btnrow" style="margin-top:16px"><a class="btn" href="${cancel}">Cancel</a><button class="btn pri" onclick="App.saveNew()">Save animal</button></div></div>` };
   },
 
   animal([id]) {
     const a = animal(id); if (!a) return { title: 'Not found', back: '#/cattle', body: '<div class="empty">Animal not found.</div>' };
     const o = ownerOf(a);
     const hist = [
-      ...S.events.filter((e) => e.animalId === a.id).map((e) => ({ at: e.at, title: EV[e.type] || e.type, text: e.type === 'registered' ? e.details : e.details, k: e.type === 'note' ? 'n' : e.type === 'died' || e.type === 'sold' ? 'x' : '' })),
-      ...S.vaccinations.filter((v) => v.animalId === a.id).map((v) => { const s = S.sessions.find((x) => x.id === v.sessionId) || {}; return { at: v.at, title: 'Vaccinated', text: `${s.vaccine || ''}${s.dose ? ' · ' + s.dose : ''}`, k: 'v' }; }),
+      ...S.events.filter((e) => e.animalId === a.id).map((e) => ({ at: e.at, title: EV[e.type] || e.type, text: e.details, k: e.type === 'note' ? 'n' : e.type === 'died' || e.type === 'sold' ? 'x' : '', d: e.type === 'registered' && /from paper/.test(e.details) })),
+      ...S.vaccinations.filter((v) => v.animalId === a.id).map((v) => { const s = session(v.sessionId) || {}; return { at: v.at, title: 'Vaccinated', text: `${s.vaccine || ''}${s.dose ? ' · ' + s.dose : ''}${v.source === 'paper' ? ' — from paper notes' : ''}`, k: 'v', d: v.source === 'paper' }; }),
     ].sort((x, y) => y.at.localeCompare(x.at));
     const active = a.status === 'active';
-    return { title: `Ear tag ${a.tag}`, back: '#/cattle', body: `<div class="${VIEW === 'desktop' ? 'dash' : ''}"><div>
-      <div class="card"><div class="animal-h">${tagVis(a)}<div><div style="font-weight:700;font-size:17px">${CAT[a.category]} · ${cap(a.gender)}</div>
-        <div class="small"><a href="#/owner/${o.id}" style="text-decoration:underline">${swatch(o.colour)} ${h(o.name)}</a></div><div style="margin-top:4px">${statusBadge(a)}</div></div></div>
-        <dl class="kv"><dt>Description</dt><dd>${a.description ? h(a.description) : '<span class="muted">—</span>'}</dd>
-        <dt>Registered</dt><dd>${fmtDT(a.createdAt)}</dd>
+    return { title: `Ear tag ${a.tag}`, back: '#/cattle', body: `<div class="${wide() ? 'dash' : ''}"><div>
+      <div class="card"><div class="animal-h">${tagVis(a)}<div><div style="font-weight:700;font-size:17px">${CAT[a.category]} · ${cap(a.gender)}</div><div class="small muted">${h(a.breed)}</div>
+        <a class="ownerlink" href="#/owner/${o.id}">${avatar(o, 24)} ${h(o.name)}</a><div style="margin-top:4px">${statusBadge(a)}</div></div></div>
+        <dl class="kv"><dt>Owner</dt><dd>${h(o.name)}</dd><dt>Breed</dt><dd>${h(a.breed)}</dd>
+        <dt>Tag colour</dt><dd>${swatch(a.tagColour)} ${cap(a.tagColour)}${a.tagColour !== o.colour ? ` <span class="small muted">— ${h(o.name)}'s usual colour is ${o.colour}</span>` : ''}</dd>
+        <dt>Description</dt><dd>${a.description ? h(a.description) : '<span class="muted">—</span>'}</dd>
+        <dt>Registered</dt><dd>${a.source === 'paper' ? `${a.createdAt.slice(0, 10)} <span class="src">from paper notes</span>` : `${fmtDT(a.createdAt)} <span class="small muted">· ${SOURCE[a.source] || ''}</span>`}</dd>
         ${active ? '' : `<dt>${a.status === 'sold' ? 'Sold on' : 'Died on'}</dt><dd>${h(a.statusDate || '')}</dd>`}</dl>
         ${active ? '' : '<div class="warnbox">Kept in the system for the record — not counted in totals.</div>'}</div>
       <div class="card"><div class="card-h">Update</div>
@@ -576,159 +945,283 @@ const Screens = {
           <button class="btn" onclick="App.dlgNote('${a.id}')">Add note</button></div>`
         : `<div class="actions"><button class="btn" onclick="App.dlgCorrect('${a.id}')">Correct a mistake</button><button class="btn" onclick="App.dlgNote('${a.id}')">Add note</button></div>`}</div></div>
       <div class="card"><div class="card-h">History <small>${hist.length} ${hist.length === 1 ? 'entry' : 'entries'}</small></div>
-        <ul class="tl">${hist.map((x) => `<li><span class="dot ${x.k}"></span><div><div><b>${h(x.title)}</b> ${x.text ? '— ' + h(x.text) : ''}</div><div class="when">${fmtDT(x.at)}</div></div></li>`).join('')}</ul></div></div>` };
+        <ul class="tl">${hist.map((x) => `<li><span class="dot ${x.k}"></span><div><div><b>${h(x.title)}</b> ${x.text ? '— ' + h(x.text) : ''}</div><div class="when">${when(x.at, x.d)}</div></div></li>`).join('')}</ul></div></div>` };
   },
 
   cattle(_, q) {
-    if (q.get('cat')) { UI.cf = { q: '', status: 'active', cat: q.get('cat'), owner: 'all' }; history.replaceState(null, '', '#/cattle'); }
+    if (q.get('cat')) { UI.cf = { q: '', status: 'active', cat: q.get('cat'), owner: 'all', breed: 'all' }; history.replaceState(null, '', '#/cattle'); }
     const f = UI.cf;
     const chip = (key, val, label) => `<button class="chip ${f[key] === val ? 'sel' : ''}" onclick="App.cf('${key}','${val}')">${label}</button>`;
     return { title: 'Cattle', body: `
-      <input id="cq" placeholder="Search ear tag or description" value="${h(f.q)}" oninput="App.cfSearch(this.value)">
+      <div class="inrow"><input id="cq" placeholder="Search ear tag, breed or description" value="${h(f.q)}" oninput="App.cfSearch(this.value)"><a class="btn pri" href="#/new" title="Add new animal">${icon('plus')}<span class="hide-s">Add new</span></a></div>
       <div class="chips" style="margin-top:10px">${chip('status', 'active', 'Active')}${chip('status', 'sold', 'Sold')}${chip('status', 'dead', 'Dead')}${chip('status', 'all', 'All')}</div>
       <div class="chips" style="margin-top:6px">${chip('cat', 'all', 'All categories')}${CATS.map((c) => chip('cat', c, CATS_PL[c])).join('')}</div>
-      <select style="margin-top:6px" onchange="App.cf('owner',this.value)"><option value="all">All owners</option>${S.owners.map((o) => `<option value="${o.id}" ${f.owner === o.id ? 'selected' : ''}>${h(o.name)} (${o.colour})</option>`).join('')}</select>
+      <div class="inrow" style="margin-top:6px"><select onchange="App.cf('owner',this.value)"><option value="all">All owners</option>${S.owners.map((o) => `<option value="${o.id}" ${f.owner === o.id ? 'selected' : ''}>${h(o.name)}</option>`).join('')}</select>
+        <select onchange="App.cf('breed',this.value)"><option value="all">All breeds</option>${S.breeds.map((b) => `<option value="${h(b)}" ${f.breed === b ? 'selected' : ''}>${h(b)}</option>`).join('')}</select></div>
       <div id="clist" style="margin-top:12px">${cattleList()}</div>` };
   },
 
   owners() {
-    return { title: 'Owners', body: `<div class="narrow">
-      <div class="card">${S.owners.map((o) => { const t = totals(S.animals.filter((a) => a.ownerId === o.id)); return `<a class="row" href="#/owner/${o.id}">${swatch(o.colour, 1)}<span class="grow"><b>${h(o.name)}</b><br><span class="small muted">${cap(o.colour)} tags${o.phone ? ' · ' + h(o.phone) : ''}</span></span><span><b>${t.all}</b> <span class="small muted">active</span></span><span class="chev">›</span></a>`; }).join('')}</div>
-      <button class="btn block" onclick="App.dlgOwner('')">+ Add owner</button>
-      <div class="hint">A and T (the grandparents) both use blue tags and are kept as two separate owners.</div></div>` };
+    return { title: 'Owners', body: `
+      <div class="ocards">${S.owners.map((o) => { const t = totals(S.animals.filter((a) => a.ownerId === o.id)); return `<a class="ocard" href="#/owner/${o.id}">${avatar(o, 54)}<span class="grow"><b class="oname">${h(o.name)}</b><span class="small muted">${swatch(o.colour)} ${cap(o.colour)} tags</span><span class="small muted">${t.cow} cows · ${t.heifer} heifers · ${t.bull} bulls · ${t.ox} oxen</span></span><span class="ocount"><b>${t.all}</b><span>active</span></span></a>`; }).join('')}</div>
+      <button class="btn block" style="margin-top:12px" onclick="App.dlgOwner('')">${icon('plus')} Add owner</button>
+      <div class="hint">Grandma and Grandpa (A and T) are one owner, with blue tags.</div>` };
   },
 
   owner([id]) {
-    const o = S.owners.find((x) => x.id === id); if (!o) return { title: 'Not found', back: '#/owners', body: '' };
-    if (UI.of.id !== id) UI.of = { id, cat: 'all', q: '', inactive: false };
+    const o = owner(id); if (!o) return { title: 'Not found', back: '#/owners', body: '<div class="empty">Owner not found.</div>' };
+    if (UI.of.id !== id) UI.of = { id, tab: 'cattle', cat: 'all', q: '', inactive: false };
     const f = UI.of; const mine = S.animals.filter((a) => a.ownerId === id); const t = totals(mine);
-    const stat = (key, n, label) => `<a class="stat ${f.cat === key ? 'sel' : ''}" role="button" style="cursor:pointer" onclick="App.of('cat','${key}')"><b>${n}</b><span>${label}</span></a>`;
-    return { title: o.name, back: '#/owners', body: `<div class="${VIEW === 'desktop' ? 'dash' : ''}"><div>
-      <div class="card"><div class="animal-h">${swatch(o.colour, 1)}<div class="grow"><div style="font-weight:750;font-size:19px">${h(o.name)}</div><div class="small muted">${cap(o.colour)} ear tags</div></div>
-        <button class="btn" onclick="App.dlgOwner('${o.id}')">Edit</button></div>
-        <dl class="kv"><dt>Phone</dt><dd>${o.phone ? h(o.phone) : '<span class="muted">—</span>'}</dd><dt>Notes</dt><dd>${o.notes ? h(o.notes) : '<span class="muted">—</span>'}</dd></dl></div>
-      <div class="card"><div class="card-h">Totals <small>active only — tap to filter</small></div>
-        <div class="grid4" style="grid-template-columns:repeat(5,1fr)">${stat('all', t.all, 'All')}${CATS.map((c) => stat(c, t[c], CATS_PL[c])).join('')}</div></div>
-      <a class="btn block" href="#/export?owner=${o.id}" style="margin-bottom:12px">Export ${h(o.name)}'s cattle to Excel</a></div>
-      <div class="card"><div class="card-h">${f.cat === 'all' ? 'All cattle' : CATS_PL[f.cat]}</div>
-        <input id="oq" placeholder="Search ${h(o.name)}'s cattle" value="${h(f.q)}" oninput="App.ofSearch(this.value)">
-        <label class="switch small"><span>Show sold and dead</span><input type="checkbox" ${f.inactive ? 'checked' : ''} onchange="App.of('inactive',this.checked)"></label>
-        <div id="olist">${ownerList()}</div></div></div>` };
+    const act = mine.filter((a) => a.status === 'active'); const breeds = countBy(act, 'breed');
+    const head = `<div class="prof"><div class="cover" style="background-color:${COLOURS[o.colour] || '#9aa9a0'}"></div><div class="prof-in">
+      <div class="prof-top"><div class="avwrap">${avatar(o, 96)}<button class="avcam" onclick="App.dlgPhoto('${o.id}')" aria-label="Change the picture">${icon('camera')}</button></div>
+        <button class="btn sm" onclick="App.dlgOwner('${o.id}')">${icon('edit')} Edit profile</button></div>
+      <div class="prof-name">${h(o.name)}</div>
+      <div class="prof-sub">${swatch(o.colour)} ${cap(o.colour)} ear tags <span>·</span> Owner since ${monthYear(o.createdAt || '2026-01-15')}</div>
+      ${o.notes ? `<div class="prof-bio">${h(o.notes)}</div>` : ''}
+      <div class="prof-btns">
+        ${o.phone ? `<a class="pbtn" href="tel:${h(o.phone.replace(/[^\d+]/g, ''))}">${icon('phone')}Call</a>` : `<button class="pbtn" onclick="App.dlgOwner('${o.id}')">${icon('phone')}Add phone</button>`}
+        <a class="pbtn" href="#/new?owner=${o.id}">${icon('plus')}Add animal</a>
+        <a class="pbtn" href="#/export?owner=${o.id}">${icon('sheet')}Export</a></div>
+      <div class="prof-stats"><div><b>${t.all}</b><span>Active</span></div><div><b>${Object.keys(breeds).length}</b><span>Breeds</span></div>
+        <div><b>${mine.filter((a) => a.status === 'sold').length}</b><span>Sold</span></div><div><b>${mine.filter((a) => a.status === 'dead').length}</b><span>Dead</span></div></div>
+      </div></div>`;
+    const tabs = wide() ? [['cattle', 'Cattle'], ['activity', 'Activity']] : [['cattle', 'Cattle'], ['about', 'About'], ['activity', 'Activity']];
+    if (!tabs.some(([k]) => k === f.tab)) f.tab = 'cattle';
+    const tabBar = `<div class="ptabs">${tabs.map(([k, l]) => `<button class="${f.tab === k ? 'on' : ''}" onclick="App.of('tab','${k}')">${l}</button>`).join('')}</div>`;
+    const about = ownerAbout(o, act, breeds);
+    const body = f.tab === 'about' ? about : f.tab === 'activity' ? ownerActivity(o) : ownerCattle(o, t);
+    return { title: o.name, back: '#/owners', body: wide() ? `<div class="dash"><div>${head}${about}</div><div>${tabBar}${body}</div></div>` : head + tabBar + body };
   },
 
-  vacc([id]) {
+  vacc([id, sub]) {
     if (id === 'new') return Screens.vaccNew();
+    if (id && sub === 'paper') return Screens.vaccPaper(id);
     if (id) return Screens.vaccSession(id);
     const s = openSession();
     const past = S.sessions.filter((x) => x.endedAt).sort((a, b) => b.date.localeCompare(a.date));
     return { title: 'Vaccination', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
-      ${s ? `<a class="banner" href="#/vacc/${s.id}">Session running: <b>${h(s.vaccine)}</b> — ${sessionCount(s)} done. <u>Continue ›</u></a>`
-      : `<a class="btn pri block" href="#/vacc/new" style="margin-bottom:12px">Start a vaccination session</a>`}
+      ${s ? sessionBanner(s) : `<a class="btn pri block" href="#/vacc/new" style="margin-bottom:12px">Start a vaccination session</a>`}
       <div class="card"><div class="card-h">Past sessions</div>
-        ${past.length ? past.map((x) => `<a class="row" href="#/vacc/${x.id}"><span class="grow"><b>${h(x.vaccine)}</b><br><span class="small muted">${h(x.date)}${x.dose ? ' · ' + h(x.dose) : ''}</span></span><b>${sessionCount(x)}</b><span class="chev">›</span></a>`).join('') : '<div class="empty">No sessions yet.</div>'}</div></div>` };
+        ${past.length ? past.map((x) => { const p = progress(x); return `<a class="row" href="#/vacc/${x.id}"><span class="grow"><b>${h(x.vaccine)}</b><br><span class="small muted">${h(x.date)}${x.dose ? ' · ' + h(x.dose) : ''} · ${h(groupLabel(x))}</span></span><span class="small muted">${p.done} of ${p.total}</span><span class="chev">›</span></a>`; }).join('') : '<div class="empty">No sessions yet.</div>'}</div>
+      <div class="hint">One session can stay open over several days. Cattle done on paper are added from the session screen.</div></div>` };
   },
   vaccNew() {
+    if (!UI.vn) UI.vn = { date: today(), vaccine: '', dose: '', reason: '', mode: 'all', owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), err: '' };
+    const v = UI.vn;
+    const n = S.animals.filter((a) => a.status === 'active' && (v.mode === 'all' || (v.owners.has(a.ownerId) && v.cats.has(a.category)))).length;
     return { title: 'Start session', back: '#/vacc', body: `<div class="narrow">
-      <label class="lbl">Date</label><input id="vd" type="date" value="${today()}">
-      <label class="lbl">Vaccine / medicine</label><input id="vv" placeholder="e.g. Anthrax vaccine">
-      <label class="lbl">Dose <span class="opt">(optional)</span></label><input id="vdo" placeholder="e.g. 2 ml">
-      <label class="lbl">Reason <span class="opt">(optional)</span></label><input id="vr" placeholder="e.g. Yearly vaccination">
-      <div id="verr"></div>
+      <label class="lbl">Date</label><input id="vd" type="date" value="${h(v.date)}" oninput="App.vn('date',this.value)">
+      <label class="lbl">Vaccine / medicine</label><input id="vv" placeholder="e.g. Anthrax vaccine" value="${h(v.vaccine)}" oninput="App.vn('vaccine',this.value)">
+      <label class="lbl">Dose <span class="opt">(optional)</span></label><input id="vdo" placeholder="e.g. 2 ml" value="${h(v.dose)}" oninput="App.vn('dose',this.value)">
+      <label class="lbl">Reason <span class="opt">(optional)</span></label><input id="vr" placeholder="e.g. Yearly vaccination" value="${h(v.reason)}" oninput="App.vn('reason',this.value)">
+      <label class="lbl">Which cattle are in this session?</label>
+      <div class="seg2"><button class="${v.mode === 'all' ? 'sel' : ''}" onclick="App.vnMode('all')">All active cattle</button><button class="${v.mode === 'group' ? 'sel' : ''}" onclick="App.vnMode('group')">Choose a group</button></div>
+      ${v.mode === 'group' ? `<div class="card" style="margin-top:10px"><div class="card-h">Owners</div>
+        ${S.owners.map((o) => `<label class="check"><input type="checkbox" ${v.owners.has(o.id) ? 'checked' : ''} onchange="App.vnToggle('owners','${o.id}')">${avatar(o, 22)} ${h(o.name)}</label>`).join('')}
+        <div class="card-h" style="margin-top:10px">Categories</div>
+        ${CATS.map((c) => `<label class="check"><input type="checkbox" ${v.cats.has(c) ? 'checked' : ''} onchange="App.vnToggle('cats','${c}')"> ${CATS_PL[c]}</label>`).join('')}</div>` : ''}
+      <div class="hint"><b>${n}</b> active cattle in this session — progress is counted out of this number (e.g. 13 bulls out of 40).</div>
+      ${v.err ? `<div class="err">${h(v.err)}</div>` : ''}
       <button class="btn pri block" style="margin-top:16px" onclick="App.startSession()">Start session</button>
       <div class="hint">Then scan each animal. Known tags are marked vaccinated; new tags are registered first.</div></div>` };
   },
   vaccSession(id) {
-    const s = S.sessions.find((x) => x.id === id); if (!s) return { title: 'Not found', back: '#/vacc', body: '' };
+    const s = session(id); if (!s) return { title: 'Not found', back: '#/vacc', body: '<div class="empty">Session not found.</div>' };
+    const p = progress(s); const open = !s.endedAt;
     const vs = S.vaccinations.filter((v) => v.sessionId === id);
-    const per = S.owners.map((o) => [o, vs.filter((v) => animal(v.animalId).ownerId === o.id).length]).filter(([, n]) => n);
-    const open = !s.endedAt;
-    return { title: open ? 'Session running' : 'Session summary', back: '#/vacc', body: `<div class="${VIEW === 'desktop' ? 'dash' : ''}"><div>
-      <div class="card"><div class="muted small">${h(s.date)} · ${open ? 'running' : 'ended ' + fmtDT(s.endedAt)}</div>
-        <div style="font-size:19px;font-weight:750;margin:2px 0">${h(s.vaccine)}</div>
-        <div class="small muted">${s.dose ? 'Dose: ' + h(s.dose) : 'No dose entered'}${s.reason ? ' · ' + h(s.reason) : ''}</div>
-        <div style="display:flex;align-items:baseline;gap:8px;margin-top:12px"><span class="big">${vs.length}</span><span class="muted">vaccinated</span></div></div>
-      ${open ? `<a class="bigscan" href="#/scan">${icon('scan')} Scan next animal</a>` : ''}
-      <div class="card"><div class="card-h">Per owner</div>${per.length ? per.map(([o, n]) => `<div class="row">${swatch(o.colour, 1)}<span class="grow">${h(o.name)}</span><b>${n}</b></div>`).join('') : '<div class="empty">No animals yet.</div>'}</div>
-      ${open ? `<button class="btn warn block" onclick="App.dlgEndSession('${s.id}')">End session</button>` : ''}</div>
-      <div class="card"><div class="card-h">${open ? 'Last scanned' : 'Animals vaccinated'}</div>
-        ${vs.slice().reverse().slice(0, open ? 8 : 400).map((v) => { const a = animal(v.animalId); return `<a class="row" href="#/animal/${a.id}">${swatch(ownerOf(a).colour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(ownerName(a.ownerId))}</span><span class="small muted">${fmtDT(v.at).slice(11)}</span></a>`; }).join('') || '<div class="empty">Nothing scanned yet.</div>'}</div></div>` };
+    const day = daysBetween(s.date, today()) + 1;
+    const summary = `<div class="card"><div class="muted small">Started ${h(s.date)} · ${open ? `running${day > 1 ? ` — day ${day}` : ''}` : 'ended ' + fmtDT(s.endedAt)}</div>
+      <div style="font-size:19px;font-weight:750;margin:2px 0">${h(s.vaccine)}</div>
+      <div class="small muted">${s.dose ? 'Dose: ' + h(s.dose) : 'No dose entered'}${s.reason ? ' · ' + h(s.reason) : ''}</div>
+      <div class="small muted">In this session: ${h(groupLabel(s))}</div>
+      <div class="bignum"><span class="big">${p.done}</span><span class="muted">of ${p.total} vaccinated (${pct(p.done, p.total)}%)</span></div>${bar(p.done, p.total)}
+      <div class="small" style="margin-top:8px"><b>${p.total - p.done}</b> not vaccinated yet${p.paper ? ` · ${p.paper} from paper notes` : ''}${p.extra ? ` · ${p.extra} outside the group` : ''}</div></div>`;
+    const cats = `<div class="card"><div class="card-h">By category <small>vaccinated out of ${s.group ? 'the group' : 'all active'}</small></div>
+      ${CATS.filter((c) => p.cats[c].total).map((c) => `<div class="prow"><span class="pl">${CATS_PL[c]}</span>${bar(p.cats[c].done, p.cats[c].total)}<span class="pn"><b>${p.cats[c].done}</b> of ${p.cats[c].total}</span></div>`).join('') || '<div class="empty">No cattle in this session.</div>'}</div>`;
+    const owners = `<div class="card"><div class="card-h">By owner</div>
+      ${S.owners.filter((o) => p.owners[o.id] && p.owners[o.id].total).map((o) => `<div class="prow"><span class="pl">${avatar(o, 22)} ${h(o.name)}</span>${bar(p.owners[o.id].done, p.owners[o.id].total)}<span class="pn"><b>${p.owners[o.id].done}</b> of ${p.owners[o.id].total}</span></div>`).join('') || '<div class="empty">No cattle in this session.</div>'}</div>`;
+    const miss = `<div class="card"><div class="card-h">Not vaccinated yet <small>${p.missing.length}</small></div>
+      <div class="btnrow"><button class="btn sm" onclick="App.toggleMissing()">${UI.missOpen ? 'Hide list' : 'See list'}</button><button class="btn sm" onclick="App.printMissing('${id}')">${icon('print')} Print</button>
+        <button class="btn sm" onclick="App.exportMissing('${id}','pdf')">${icon('pdf')} PDF</button><button class="btn sm" onclick="App.exportMissing('${id}','xlsx')">${icon('sheet')} Excel</button></div>
+      ${UI.missOpen ? `<div style="margin-top:8px">${p.missing.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono">${h(a.tag)}</span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span></a>`).join('') || '<div class="empty">All done.</div>'}</div>` : ''}</div>`;
+    const acts = `${open && VIEW !== 'tablet' ? `<a class="bigscan" href="#/scan">${icon('scan')} ${hasCam() ? 'Scan next animal' : 'Enter next ear tag'}</a>` : ''}
+      <a class="btn block" href="#/vacc/${id}/paper" style="margin-bottom:12px">${icon('paper')} Add cattle from paper notes</a>`;
+    const list = `<div class="card"><div class="card-h">${open ? 'Last entered' : 'Animals vaccinated'} <small>${vs.length}</small></div>${vs.slice().reverse().slice(0, open ? 8 : 400).map(vRow).join('') || '<div class="empty">Nothing entered yet.</div>'}</div>`;
+    const end = open ? `<button class="btn warn block" onclick="App.dlgEndSession('${id}')">End session</button>` : '';
+    let body;
+    if (VIEW === 'tablet' && open) body = `<div class="dash"><div>${scanPanel(s)}<div style="height:12px"></div>${acts}${list}</div><div>${summary}${cats}${miss}${owners}${end}</div></div>`;
+    else if (wide()) body = `<div class="dash"><div>${summary}${acts}${cats}${owners}${end}</div><div>${miss}${list}</div></div>`;
+    else body = summary + acts + cats + miss + owners + list + end;
+    return { title: open ? 'Session running' : 'Session summary', back: '#/vacc', body };
+  },
+  vaccPaper(id) {
+    const s = session(id); if (!s) return { title: 'Not found', back: '#/vacc', body: '' };
+    if (!UI.paper || UI.paper.sid !== id) UI.paper = { sid: id, date: s.endedAt ? s.date : today(), text: '', checked: false, checkedText: '', err: '' };
+    const P = UI.paper; const rows = P.checked ? paperCheck(s, parseTags(P.checkedText)) : [];
+    const ok = rows.filter((r) => r.kind === 'ok').length;
+    return { title: 'Add from paper notes', back: `#/vacc/${id}`, body: `<div class="narrow">
+      <div class="card"><div class="muted small">${h(s.date)} · ${s.endedAt ? 'ended' : 'running'}</div><b>${h(s.vaccine)}</b>
+        <div class="small muted" style="margin-top:6px">For cattle vaccinated while the phone or tablet was off, flat or not there, and written on paper. Type their ear tag numbers here.</div></div>
+      <label class="lbl">Date they were vaccinated</label><input id="pdate" type="date" value="${h(P.date)}" oninput="App.paperField('date',this.value)">
+      <label class="lbl">Ear tag numbers <span class="opt">— one per line, or with spaces between</span></label>
+      <textarea id="ptext" class="mono" style="min-height:130px" placeholder="e.g.&#10;12345678&#10;987654321" oninput="App.paperField('text',this.value)">${h(P.text)}</textarea>
+      <button class="btn block" style="margin-top:10px" onclick="App.paperCheck()">Check the numbers</button>
+      ${P.checked ? `<div class="card" style="margin-top:12px"><div class="card-h">Checked <small>${ok} ready to add</small></div>${rows.map(paperRow).join('') || '<div class="empty">No numbers typed.</div>'}</div>
+        <button class="btn pri block" ${ok ? '' : 'disabled'} onclick="App.paperSave()">Mark ${ok} as vaccinated</button>` : ''}
+      ${P.err ? `<div class="err">${h(P.err)}</div>` : ''}
+      <div class="hint">A number that is not in the system can be registered from here; you come back to this list afterwards.</div></div>` };
   },
 
   export(_, q) {
-    if (!UI.ex) UI.ex = { owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), inc: false };
+    if (!UI.ex) UI.ex = { owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), xb: new Set(), inc: false };
     if (q.get('owner')) { UI.ex.owners = new Set([q.get('owner')]); history.replaceState(null, '', '#/export'); }
-    const e = UI.ex; const list = exportList();
-    return { title: 'Export to Excel', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="${VIEW === 'desktop' ? 'dash' : ''}"><div>
-      <div class="card"><div class="card-h">Owners <span><button class="linkbtn" onclick="App.exAll('owners',1)">All</button><button class="linkbtn" onclick="App.exAll('owners',0)">None</button></span></div>
-        ${S.owners.map((o) => `<label class="check"><input type="checkbox" ${e.owners.has(o.id) ? 'checked' : ''} onchange="App.exToggle('owners','${o.id}')">${swatch(o.colour)} ${h(o.name)}</label>`).join('')}</div>
+    const e = UI.ex; const list = exportList(); const fmt = S.exportFmt || 'xlsx';
+    const cols = S.exportCols; const on = cols.filter((c) => c.on); const rows = exportRows(list.slice(0, 5));
+    const filters = `<div class="card"><div class="card-h">Owners <span><button class="linkbtn" onclick="App.exAll('owners',1)">All</button><button class="linkbtn" onclick="App.exAll('owners',0)">None</button></span></div>
+        ${S.owners.map((o) => `<label class="check"><input type="checkbox" ${e.owners.has(o.id) ? 'checked' : ''} onchange="App.exToggle('owners','${o.id}')">${avatar(o, 22)} ${h(o.name)}</label>`).join('')}</div>
       <div class="card"><div class="card-h">Categories</div>
         ${CATS.map((c) => `<label class="check"><input type="checkbox" ${e.cats.has(c) ? 'checked' : ''} onchange="App.exToggle('cats','${c}')"> ${CATS_PL[c]}</label>`).join('')}
-        <label class="switch" style="border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span>Include sold and dead cattle</span><input type="checkbox" ${e.inc ? 'checked' : ''} onchange="App.exInc(this.checked)"></label></div></div>
-      <div><div class="card"><div class="card-h">Preview <small>${list.length} cattle will be exported</small></div>
-        <table class="tbl"><tr><th>Ear tag</th><th>Owner</th><th>Category</th><th>Status</th></tr>
-        ${list.slice(0, 6).map((a) => `<tr><td class="mono">${h(a.tag)}</td><td>${swatch(ownerOf(a).colour)} ${h(ownerName(a.ownerId))}</td><td>${CAT[a.category]}</td><td>${statusBadge(a)}</td></tr>`).join('')}</table>
-        ${list.length > 6 ? `<div class="hint">… and ${list.length - 6} more</div>` : ''}</div>
-      <button class="btn pri block" ${list.length ? '' : 'disabled'} onclick="App.doExport()">Export to Excel (.xlsx)</button>
-      <div class="hint">Sheets: Cattle, Summary (per owner), Filters. The file is saved on the device and can be shared later.</div></div></div>` };
+        <label class="switch" style="border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span>Include sold and dead cattle</span><input type="checkbox" ${e.inc ? 'checked' : ''} onchange="App.exInc(this.checked)"></label></div>
+      <div class="card"><div class="card-h">Breeds <span><button class="linkbtn" onclick="App.exAll('breeds',1)">All</button><button class="linkbtn" onclick="App.exAll('breeds',0)">None</button></span></div>
+        ${S.breeds.map((b, i) => `<label class="check"><input type="checkbox" ${e.xb.has(b) ? '' : 'checked'} onchange="App.exBreed(${i})"> ${h(b)}</label>`).join('')}</div>`;
+    const colsCard = `<div class="card"><div class="card-h">Columns <small>${on.length} chosen — tick them and set the order</small></div>
+      ${cols.map((c, i) => `<div class="colrow${c.on ? '' : ' off'}"><span class="coln">${c.on ? on.indexOf(c) + 1 : ''}</span><label class="check grow"><input type="checkbox" ${c.on ? 'checked' : ''} onchange="App.colToggle('${c.k}')">${h(COL[c.k].label)}</label><button class="mv" ${i === 0 ? 'disabled' : ''} onclick="App.colMove('${c.k}',-1)" aria-label="Move up">▲</button><button class="mv" ${i === cols.length - 1 ? 'disabled' : ''} onclick="App.colMove('${c.k}',1)" aria-label="Move down">▼</button></div>`).join('')}
+      <button class="btn sm" style="margin-top:10px" onclick="App.colsReset()">Back to the usual columns</button>
+      <div class="hint">The ticked columns go into the file in this order. The choice is remembered for next time.</div></div>`;
+    const fmtCard = `<div class="card"><div class="card-h">File type <small>free to open on phones and computers</small></div>
+      <div class="seg2">${Object.entries(FORMATS).map(([k, [l, ext]]) => `<button class="${fmt === k ? 'sel' : ''}" onclick="App.exFmt('${k}')">${l} <span class="small">${ext}</span></button>`).join('')}</div>
+      <div class="hint">${FORMATS[fmt][2]}</div></div>`;
+    const ready = list.length && on.length;
+    const preview = `<div class="card"><div class="card-h">Preview <small>${list.length} cattle · ${on.length} columns</small></div>
+      ${on.length ? `<div class="tblwrap"><table class="tbl"><tr>${rows[0].map((x) => `<th>${h(x)}</th>`).join('')}</tr>${rows.slice(1).map((r) => `<tr>${r.map((x) => `<td>${h(x)}</td>`).join('')}</tr>`).join('')}</table></div>${list.length > 5 ? `<div class="hint">… and ${list.length - 5} more</div>` : ''}` : '<div class="empty">Tick at least one column.</div>'}</div>
+      <button class="btn pri block" ${ready ? '' : 'disabled'} onclick="App.doExport()">${icon(fmt === 'pdf' ? 'pdf' : 'sheet')} Export ${list.length} cattle as ${FORMATS[fmt][0]}</button>
+      <button class="btn block" style="margin-top:8px" ${ready ? '' : 'disabled'} onclick="App.printExport()">${icon('print')} Print</button>
+      <div class="hint">The file is saved on the device. It can then be shared, copied to a USB drive, or sent when there is internet.</div>`;
+    return { title: 'Export', back: VIEW === 'phone' ? '#/more' : '', body: wide() ? `<div class="dash"><div>${filters}${colsCard}</div><div>${fmtCard}${preview}</div></div>` : filters + colsCard + fmtCard + preview };
   },
 
   audit() {
     const rows = S.audit.slice().sort((a, b) => b.at.localeCompare(a.at)).slice(0, 300);
-    return { title: 'Audit log', back: VIEW === 'phone' ? '#/more' : '', body: VIEW === 'desktop'
+    return { title: 'Audit log', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="hint" style="margin:0 0 10px">Every change: what changed (before → after), when, and on which device.</div>` + (wide()
       ? `<div class="card"><table class="tbl"><tr><th>When</th><th>Device</th><th>Action</th><th>Details</th></tr>${rows.map((r) => `<tr><td class="small">${fmtDT(r.at)}</td><td class="small">${h(r.device)}</td><td class="mono small">${h(r.action)}</td><td>${h(r.details)}</td></tr>`).join('')}</table></div>`
-      : `<div class="card"><ul class="tl">${rows.map((r) => `<li><span class="dot"></span><div><div class="mono small"><b>${h(r.action)}</b></div><div>${h(r.details)}</div><div class="when">${fmtDT(r.at)} · ${h(r.device)}</div></div></li>`).join('')}</ul></div>` };
+      : `<div class="card"><ul class="tl">${rows.map((r) => `<li><span class="dot"></span><div><div class="mono small"><b>${h(r.action)}</b></div><div>${h(r.details)}</div><div class="when">${fmtDT(r.at)} · ${h(r.device)}</div></div></li>`).join('')}</ul></div>`) };
   },
 
   sync() {
+    const last = BACKUP_WAYS[S.lastBackupWay];
     return { title: 'Backup & sync', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
       <div class="card"><div class="card-h">Where are you? <small>pretend</small></div>
         <div class="seg2"><button class="${S.online ? '' : 'sel'}" onclick="App.setOnline(false)">On the farm — no internet</button><button class="${S.online ? 'sel' : ''}" onclick="App.setOnline(true)">In town — internet</button></div></div>
-      <div class="card"><div class="card-h">Backup to the farm laptop</div>
-        <div>Last backup: <b>${S.lastBackup ? fmtDT(S.lastBackup) : 'never'}</b> <span class="muted small">(${ago(S.lastBackup)})</span></div>
-        <div class="btnrow" style="margin-top:10px"><button class="btn pri" onclick="App.backup()">Back up now</button><button class="btn" onclick="App.saveBackupFile()">Save backup file</button></div>
-        <div class="hint">Works on the farm without internet (cable or local Wi-Fi). "Save backup file" really downloads one.</div></div>
+      <div class="card"><div class="card-h">Backup <small>works without internet</small></div>
+        <div>Last backup: <b>${S.lastBackup ? fmtDT(S.lastBackup) : 'never'}</b> <span class="muted small">(${ago(S.lastBackup)}${last ? ' · ' + h(last[0]) : ''})</span></div>
+        <div class="ways">${Object.entries(BACKUP_WAYS).map(([k, [l, ic]]) => `<button class="way${S.lastBackupWay === k ? ' last' : ''}" onclick="App.dlgBackup('${k}')">${icon(ic)}<span>${l}</span></button>`).join('')}</div>
+        <button class="btn block" style="margin-top:10px" onclick="App.saveBackupFile()">Save a backup file on this device</button>
+        <div class="hint">One backup file, locked with the backup password, carried any of these four ways. "Save a backup file" really downloads one here.</div></div>
       <div class="card"><div class="card-h">Sync</div>
         <div><b>${S.pending}</b> changes waiting to sync</div>
         <div class="small muted">Last sync: ${S.lastSync ? fmtDT(S.lastSync) : 'never'} (${ago(S.lastSync)})</div>
         <button class="btn pri block" style="margin-top:10px" ${S.online ? '' : 'disabled'} onclick="App.sync()">Sync now</button>
-        <div class="proto">The sync method will be chosen later (PLT-06). Here, syncing is pretend.</div></div></div>` };
+        <div class="proto">The internet sync method will be chosen later (PLT-06). Here, syncing is pretend.</div></div></div>` };
   },
 
   settings() {
+    const counts = countBy(S.animals, 'breed');
     return { title: 'Farm settings', back: VIEW === 'phone' ? '#/more' : '', body: `<div class="narrow">
       <label class="lbl">Farm name</label><input id="fn" value="${h(S.farm.name)}">
       <label class="lbl">Farm number</label><input id="fnum" value="${h(S.farm.number)}" placeholder="e.g. establishment number">
       <div class="hint">Is this the NamLITS establishment number? (to be confirmed)</div>
-      <label class="lbl">This device</label><select id="fdev">${['Android phone', 'iPhone', 'Farm laptop'].map((d) => `<option ${S.device === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
+      <label class="lbl">This device</label><select id="fdev">${DEVICES.map((d) => `<option ${S.device === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
       <button class="btn pri block" style="margin-top:16px" onclick="App.saveFarm()">Save</button>
-      <div class="card" style="margin-top:22px"><div class="card-h">Prototype</div><div class="small muted">All data here is made up and kept only in this browser.</div>
+      <div class="card" style="margin-top:22px"><div class="card-h">Breeds <small>${S.breeds.length}</small></div>
+        <div class="proto">Sample breeds — the farm's own list will be added later.</div>
+        ${S.breeds.map((b) => `<div class="row"><span class="grow">${h(b)}</span><span class="small muted">${counts[b] || 0} cattle</span></div>`).join('')}
+        <div class="inrow" style="margin-top:10px"><input id="nbreed" placeholder="Name of a new breed"><button class="btn pri" onclick="App.addBreed()">Add</button></div><div id="berr"></div></div>
+      <div class="card"><div class="card-h">Prototype</div><div class="small muted">All data here is made up and kept only in this browser.</div>
         <button class="btn warn block" style="margin-top:10px" onclick="App.reset()">Reset sample data</button></div></div>` };
   },
 
   more() {
-    const items = [['vacc', 'Vaccination sessions', 'syringe'], ['export', 'Export to Excel', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings', 'gear']];
+    const items = [['vacc', 'Vaccination sessions', 'syringe'], ['new', 'Add new animal', 'plus'], ['export', 'Export — Excel, PDF, CSV', 'sheet'], ['audit', 'Audit log', 'log'], ['sync', 'Backup & sync', 'sync'], ['settings', 'Farm settings and breeds', 'gear']];
     return { title: 'More', body: `<div class="card">${items.map(([k, l, ic]) => `<a class="row" href="#/${k}"><span style="width:22px;color:var(--g)">${icon(ic)}</span><span class="grow">${l}</span><span class="chev">›</span></a>`).join('')}</div>
       <div class="proto">This is a prototype of the design. The camera, backup and sync are pretend. Everything else works and is kept in this browser.</div>` };
   },
 };
 
+function ownerCattle(o, t) {
+  const f = UI.of;
+  return `<div class="card"><div class="chips">${[['all', t.all, 'All'], ...CATS.map((c) => [c, t[c], CATS_PL[c]])].map(([k, n, l]) => `<button class="chip ${f.cat === k ? 'sel' : ''}" onclick="App.of('cat','${k}')">${l} <span class="n">${n}</span></button>`).join('')}</div>
+    <input id="oq" style="margin-top:10px" placeholder="Search ${h(o.name)}'s cattle" value="${h(f.q)}" oninput="App.ofSearch(this.value)">
+    <label class="switch small"><span>Show sold and dead</span><input type="checkbox" ${f.inactive ? 'checked' : ''} onchange="App.of('inactive',this.checked)"></label>
+    <div id="olist">${ownerList()}</div></div>`;
+}
+function ownerAbout(o, act, breeds) {
+  const cols = byCount(countBy(act, 'tagColour'));
+  const s = openSession(); const sp = s && progress(s).owners[o.id];
+  const last = S.sessions.filter((x) => x.endedAt).sort((a, b) => b.date.localeCompare(a.date))[0];
+  const lastN = last ? S.vaccinations.filter((v) => v.sessionId === last.id && (animal(v.animalId) || {}).ownerId === o.id).length : 0;
+  return `<div class="card"><div class="card-h">About</div>
+      <div class="info"><span class="ii">${icon('phone')}</span><div><div class="small muted">Phone</div>${o.phone ? h(o.phone) : '<span class="muted">Not added yet</span>'}</div></div>
+      <div class="info"><span class="ii">${icon('tag')}</span><div><div class="small muted">Usual ear tag colour</div>${swatch(o.colour)} ${cap(o.colour)}</div></div>
+      <div class="info"><span class="ii">${icon('note')}</span><div><div class="small muted">Notes</div>${o.notes ? h(o.notes) : '<span class="muted">—</span>'}</div></div></div>
+    <div class="card"><div class="card-h">Breeds <small>active cattle</small></div>
+      ${byCount(breeds).map(([b, n]) => `<div class="prow"><span class="pl">${h(b)}</span>${bar(n, act.length)}<span class="pn"><b>${n}</b></span></div>`).join('') || '<div class="empty">No active cattle.</div>'}</div>
+    <div class="card"><div class="card-h">Tag colours in the ears <small>tags are mixed</small></div>
+      <div class="chips">${cols.map(([c, n]) => `<span class="chip">${swatch(c)} ${cap(c)} <span class="n">${n}</span></span>`).join('') || '<span class="muted">—</span>'}</div></div>
+    <div class="card"><div class="card-h">Vaccination</div>
+      ${sp && sp.total ? `<div class="small">Running: <b>${h(s.vaccine)}</b></div><div class="prow"><span class="pl">This owner</span>${bar(sp.done, sp.total)}<span class="pn"><b>${sp.done}</b> of ${sp.total}</span></div>` : ''}
+      ${last ? `<div class="small muted">Last session: ${h(last.vaccine)} (${h(last.date)}) — ${lastN} of this owner's cattle</div>` : '<div class="small muted">No sessions yet.</div>'}</div>`;
+}
+function ownerActivity(o) {
+  const ids = new Set(S.animals.filter((a) => a.ownerId === o.id).map((a) => a.id));
+  const items = [
+    ...S.events.filter((e) => ids.has(e.animalId)).map((e) => ({ at: e.at, id: e.animalId, title: EV[e.type] || e.type, text: e.details, k: e.type === 'note' ? 'n' : e.type === 'died' || e.type === 'sold' ? 'x' : '', d: /from paper/.test(e.details) })),
+    ...S.vaccinations.filter((v) => ids.has(v.animalId)).map((v) => ({ at: v.at, id: v.animalId, title: 'Vaccinated', text: (session(v.sessionId) || {}).vaccine + (v.source === 'paper' ? ' — from paper notes' : ''), k: 'v', d: v.source === 'paper' })),
+  ].sort((x, y) => y.at.localeCompare(x.at)).slice(0, 40);
+  return `<div class="card"><div class="card-h">Recent activity <small>latest ${items.length}</small></div>
+    <ul class="tl">${items.map((x) => `<li><span class="dot ${x.k}"></span><div><div><a class="mono" href="#/animal/${x.id}"><b>${h((animal(x.id) || {}).tag)}</b></a> · ${h(x.title)}${x.text ? ' — ' + h(x.text) : ''}</div><div class="when">${when(x.at, x.d)}</div></div></li>`).join('') || '<li class="empty">Nothing yet.</li>'}</ul></div>`;
+}
 function cattleList() {
   const f = UI.cf; const q = f.q.trim().toLowerCase();
   const list = S.animals.filter((a) => (f.status === 'all' || a.status === f.status) && (f.cat === 'all' || a.category === f.cat) && (f.owner === 'all' || a.ownerId === f.owner)
-    && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q))).sort(sortTag);
+    && (f.breed === 'all' || a.breed === f.breed) && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
   if (!list.length) return '<div class="empty">No cattle match.</div>';
-  if (VIEW === 'desktop') return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:0;overflow:hidden"><table class="tbl">
-    <tr><th>Ear tag</th><th>Owner</th><th>Gender</th><th>Category</th><th>Status</th><th>Description</th><th>Registered</th></tr>
-    ${list.map((a) => `<tr class="click" onclick="location.hash='#/animal/${a.id}'"><td class="mono">${h(a.tag)}</td><td>${swatch(ownerOf(a).colour)} ${h(ownerName(a.ownerId))}</td><td>${cap(a.gender)}</td><td>${CAT[a.category]}</td><td>${statusBadge(a)}</td><td>${h(a.description)}</td><td class="small muted">${a.createdAt.slice(0, 10)}</td></tr>`).join('')}</table></div>`;
-  return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:4px 12px">${list.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(ownerOf(a).colour, 1)}<span class="grow"><span class="mono"><b>${h(a.tag)}</b></span><br><span class="small muted">${CAT[a.category]} · ${h(ownerName(a.ownerId))}${a.description ? ' · ' + h(a.description) : ''}</span></span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('')}</div>`;
+  if (wide()) return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:0;overflow:hidden"><table class="tbl">
+    <tr><th>Ear tag</th><th>Owner</th><th>Breed</th><th>Gender</th><th>Category</th><th>Status</th><th>Description</th></tr>
+    ${list.map((a) => `<tr class="click" onclick="location.hash='#/animal/${a.id}'"><td class="mono">${swatch(a.tagColour)} ${h(a.tag)}</td><td>${h(ownerName(a.ownerId))}</td><td>${h(a.breed)}</td><td>${cap(a.gender)}</td><td>${CAT[a.category]}</td><td>${statusBadge(a)}</td><td>${h(a.description)}</td></tr>`).join('')}</table></div>`;
+  return `<div class="small muted" style="margin-bottom:6px">Showing ${list.length}</div><div class="card" style="padding:4px 12px">${list.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour, 1)}<span class="grow"><span class="mono"><b>${h(a.tag)}</b></span><br><span class="small muted">${CAT[a.category]} · ${h(a.breed)} · ${h(ownerName(a.ownerId))}</span></span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('')}</div>`;
 }
 function ownerList() {
   const f = UI.of; const q = f.q.trim().toLowerCase();
   const list = S.animals.filter((a) => a.ownerId === f.id && (f.inactive || a.status === 'active') && (f.cat === 'all' || a.category === f.cat)
-    && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q))).sort(sortTag);
-  return list.length ? list.map((a) => `<a class="row" href="#/animal/${a.id}"><span class="mono"><b>${h(a.tag)}</b></span><span class="grow small muted">${CAT[a.category]}${a.description ? ' · ' + h(a.description) : ''}</span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('') : '<div class="empty">No cattle match.</div>';
+    && (!q || a.tag.includes(q) || (a.description || '').toLowerCase().includes(q) || (a.breed || '').toLowerCase().includes(q))).sort(sortTag);
+  return list.length ? list.map((a) => `<a class="row" href="#/animal/${a.id}">${swatch(a.tagColour)}<span class="mono"><b>${h(a.tag)}</b></span><span class="grow small muted">${CAT[a.category]} · ${h(a.breed)}${a.description ? ' · ' + h(a.description) : ''}</span>${a.status !== 'active' ? statusBadge(a) : ''}<span class="chev">›</span></a>`).join('') : '<div class="empty">No cattle match.</div>';
 }
-function exportList() { const e = UI.ex; return S.animals.filter((a) => e.owners.has(a.ownerId) && e.cats.has(a.category) && (e.inc || a.status === 'active')).sort(sortTag); }
+function exportList() { const e = UI.ex; return S.animals.filter((a) => e.owners.has(a.ownerId) && e.cats.has(a.category) && !e.xb.has(a.breed) && (e.inc || a.status === 'active')).sort(sortTag); }
+function exportRows(list) { const cols = S.exportCols.filter((c) => c.on).map((c) => COL[c.k]); return [cols.map((c) => c.label), ...list.map((a) => cols.map((c) => c.get(a)))]; }
+const parseTags = (text) => [...new Set(String(text || '').split(/[\s,;]+/).map((t) => t.trim()).filter(Boolean))];
+function paperCheck(s, tags) {
+  return tags.map((tag) => {
+    if (!/^\d{8,9}$/.test(tag)) return { tag, kind: 'bad', text: 'Not 8 or 9 digits — check the paper' };
+    const a = byTag(tag);
+    if (!a) return { tag, kind: 'new', text: 'Not in the system yet' };
+    if (a.status !== 'active') return { tag, a, kind: 'skip', text: `${a.status === 'dead' ? 'Dead' : 'Sold'} — skipped` };
+    if (S.vaccinations.some((v) => v.sessionId === s.id && v.animalId === a.id)) return { tag, a, kind: 'dup', text: 'Already vaccinated in this session' };
+    return { tag, a, kind: 'ok', text: `${CAT[a.category]} · ${a.breed} · ${ownerName(a.ownerId)}${inGroup(s, a) ? '' : ' (outside the group)'}` };
+  });
+}
+const paperRow = (r) => `<div class="row"><span class="pk ${r.kind}">${{ ok: '✓', dup: '•', skip: '–', new: '!', bad: '✗' }[r.kind]}</span><span class="mono">${h(r.tag)}</span><span class="grow small ${r.kind === 'ok' ? '' : 'muted'}">${h(r.text)}</span>${r.kind === 'new' ? `<button class="btn sm" onclick="App.paperRegister('${h(r.tag)}')">Register</button>` : ''}</div>`;
+const csv = (rows) => '﻿' + rows.map((r) => r.map((v) => { const s = String(v == null ? '' : v); return /[",;\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\r\n') + '\r\n';
+const colWidths = (rows) => rows[0].map((_, i) => Math.min(40, Math.max(8, ...rows.slice(0, 200).map((r) => String(r[i] == null ? '' : r[i]).length + 2))));
+function printTable(title, sub, rows) {
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${h(title)}</title><style>body{font:12px Arial,sans-serif;margin:14px}h2{margin:0 0 4px;font-size:17px;color:#1F4E3D}.sub{color:#444;margin-bottom:10px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:4px 6px;text-align:left}th{background:#1F4E3D;color:#fff}tr:nth-child(even) td{background:#f3f6f4}@page{margin:12mm}</style></head>
+    <body><h2>${h(title)}</h2><div class="sub">${h(sub)}</div><table><tr>${rows[0].map((x) => `<th>${h(x)}</th>`).join('')}</tr>${rows.slice(1).map((r) => `<tr>${r.map((x) => `<td>${h(x)}</td>`).join('')}</tr>`).join('')}</table></body></html>`;
+  const f = document.createElement('iframe'); f.setAttribute('aria-hidden', 'true'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(f);
+  const d = f.contentWindow.document; d.open(); d.write(html); d.close();
+  setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} setTimeout(() => f.remove(), 2000); }, 200);
+}
+function missingRows(s) { return [['#', 'Ear tag', 'Owner', 'Tag colour', 'Breed', 'Category', 'Done'], ...progress(s).missing.map((a, i) => [i + 1, a.tag, ownerName(a.ownerId), cap(a.tagColour), a.breed, CAT[a.category], ''])]; }
 
 // ---------- dialogs & toast ----------
 function modal(html) { $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)App.close()"><div class="dlg">${html}</div></div>`; }
@@ -737,24 +1230,34 @@ let toastTimer;
 function toast(msg, kind) { const t = $('#toast'); t.textContent = msg; t.className = 'show ' + (kind || ''); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = ''; }, 2600); }
 
 // ---------- routing ----------
+let lastRoute = '';
 function render() {
   const raw = location.hash.slice(1) || '/home';
   const [path, qs] = raw.split('?');
   const parts = path.split('/').filter(Boolean);
-  const sect = parts[0] || 'home';
-  const screen = Screens[sect] || Screens.home;
-  const v = screen(parts.slice(1), new URLSearchParams(qs || ''));
-  document.body.className = VIEW;
+  const sect = Object.prototype.hasOwnProperty.call(Screens, parts[0]) ? parts[0] : 'home';
+  const v = Screens[sect](parts.slice(1), new URLSearchParams(qs || ''));
+  const m = $('.main'); const keep = m && raw === lastRoute ? m.scrollTop : 0; lastRoute = raw;
+  document.body.className = VIEW + (wide() ? ' wide' : '');
   $('#vPhone').className = VIEW === 'phone' ? 'on' : '';
+  $('#vTab').className = VIEW === 'tablet' ? 'on' : '';
   $('#vDesk').className = VIEW === 'desktop' ? 'on' : '';
-  $('#app').innerHTML = VIEW === 'desktop' ? desktopShell(v, sect) : phoneShell(v, sect);
+  $('#app').innerHTML = wide() ? sideShell(v, sect) : phoneShell(v, sect);
+  if (keep) $('.main').scrollTop = keep;
 }
 function go(hash) { if (location.hash === hash) render(); else location.hash = hash; }
-
 function download(bytes, name, type) {
   const url = URL.createObjectURL(new Blob([bytes], { type }));
   const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+function nfCollect() {
+  const f = UI.nf; if (!f) return;
+  const val = (id) => { const e = $('#' + id); return e ? e.value : null; };
+  const t = val('nftag'); if (t !== null) f.tag = t.trim();
+  const d = val('nfdesc'); if (d !== null) f.description = d;
+  const dt = val('nfdate'); if (dt !== null) f.date = dt;
+  const nb = val('nfnewbreed'); if (nb !== null) f.newBreed = nb;
 }
 
 // ---------- public handlers ----------
@@ -762,47 +1265,70 @@ const api = {
   setView(v) { VIEW = v; try { localStorage.setItem(KEY + '-view', v); } catch (e) {} render(); },
   close,
   fakeRead(kind) {
-    let tag;
-    if (kind === 'known') { const act = S.animals.filter((a) => a.status === 'active'); tag = act[Math.floor(Math.random() * act.length)].tag; }
-    else { do { tag = String(1 + Math.floor(Math.random() * 9)); while (tag.length < 9) tag += Math.floor(Math.random() * 10); } while (byTag(tag)); }
-    UI.read = tag; UI.result = null; render();
+    let tag, colour;
+    if (kind === 'known') { const act = S.animals.filter((a) => a.status === 'active'); const a = act[Math.floor(Math.random() * act.length)]; tag = a.tag; colour = a.tagColour; }
+    else { do { tag = String(1 + Math.floor(Math.random() * 9)); while (tag.length < 9) tag += Math.floor(Math.random() * 10); } while (byTag(tag)); const cs = Object.keys(COLOURS); colour = cs[Math.floor(Math.random() * cs.length)]; }
+    UI.read = { tag, colour }; UI.result = null; render();
   },
-  confirmRead() { const t = UI.read; UI.read = null; api.handleTag(t); },
-  correctRead() { const t = UI.read; UI.read = null; render(); const i = $('#tagin'); i.value = t; i.focus(); },
-  lookup() { api.handleTag(($('#tagin').value || '').trim()); },
-  handleTag(tag) {
+  confirmRead() { const r = UI.read; UI.read = null; UI.lastRead = r; api.handleTag(r.tag, 'scan'); },
+  correctRead() { const r = UI.read; UI.read = null; render(); const i = $('#tagin'); i.value = r.tag; i.focus(); },
+  lookup() { UI.lastRead = null; api.handleTag(($('#tagin').value || '').trim(), 'typed'); },
+  handleTag(tag, source) {
     try { rule('POL-01', tag); } catch (e) { UI.result = { kind: 'err', text: e.message }; UI.typed = tag; render(); return; }
     UI.typed = '';
     const a = byTag(tag); const s = openSession();
     if (!a) { UI.result = null; go(`#/new/${tag}`); return; }
     if (s) {
-      try { Act.vaccinate(s, a); UI.result = { kind: 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${ownerName(a.ownerId)}) marked vaccinated — ${sessionCount(s)} done` }; }
+      try {
+        Act.vaccinate(s, a, source); const p = progress(s); const outside = !inGroup(s, a);
+        UI.result = { kind: outside ? 'warnbox' : 'ok', text: `✓ ${tag} (${CAT[a.category]}, ${a.breed}, ${ownerName(a.ownerId)}) marked vaccinated${outside ? ' — note: it is not in the group chosen for this session' : ''} — ${p.done} of ${p.total} done` };
+      }
       catch (e) { UI.result = { kind: 'warnbox', text: `${tag}: ${e.message}` }; }
       render(); return;
     }
     UI.result = null; go(`#/animal/${a.id}`);
   },
   nf(field, value) {
-    const d = $('#nfdesc'); if (d) UI.nf.description = d.value;
-    UI.nf[field] = value; UI.nf.err = '';
-    if (field === 'gender') UI.nf.category = value === 'male' ? 'bull' : 'heifer';
+    nfCollect();
+    const f = UI.nf; f[field] = value; f.err = '';
+    if (field === 'gender') f.category = value === 'male' ? 'bull' : 'heifer';
+    if (field === 'ownerId') { const o = owner(value); if (o && (!f.tagColour || f.colourAuto)) { f.tagColour = o.colour; f.colourAuto = true; } }
+    if (field === 'tagColour') f.colourAuto = false;
+    render();
+  },
+  nfBreed(v) {
+    nfCollect();
+    if (v === '__add') UI.nf.addingBreed = true; else { UI.nf.breed = v; UI.nf.addingBreed = false; }
+    UI.nf.err = ''; render();
+    if (v === '__add') { const i = $('#nfnewbreed'); if (i) i.focus(); }
+  },
+  nfAddBreed() {
+    nfCollect(); const f = UI.nf;
+    try { f.breed = Act.addBreed(f.newBreed); f.addingBreed = false; f.newBreed = ''; f.err = ''; toast(`Breed added — ${f.breed}`); } catch (e) { f.err = e.message; }
     render();
   },
   saveNew() {
-    const f = UI.nf; f.description = ($('#nfdesc') || {}).value || '';
+    nfCollect(); const f = UI.nf;
+    if (f.addingBreed && f.newBreed.trim()) { try { f.breed = Act.addBreed(f.newBreed); f.addingBreed = false; } catch (e) { f.err = e.message; render(); return; } }
     try {
-      const a = Act.register(f); const s = openSession(); UI.nf = null;
-      if (s) { Act.vaccinate(s, a); UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked vaccinated — ${sessionCount(s)} done` }; go('#/scan'); }
-      else { toast(`Saved — ${a.tag}`); go(`#/animal/${a.id}`); }
+      const a = Act.register(f); const s = openSession(); UI.nf = null; UI.lastRead = null;
+      if (f.returnTo) { toast(`Saved — ${a.tag}. Now mark it from the paper list.`); go(f.returnTo); return; }
+      if (s && f.vacc) {
+        Act.vaccinate(s, a, f.paper ? 'paper' : f.source, f.paper ? `${f.date}T12:00:00.000Z` : null); const p = progress(s);
+        UI.result = { kind: 'ok', text: `✓ ${a.tag} registered and marked vaccinated — ${p.done} of ${p.total} done` };
+        go(VIEW === 'tablet' ? `#/vacc/${s.id}` : '#/scan'); return;
+      }
+      toast(`Saved — ${a.tag}`); go(`#/animal/${a.id}`);
     } catch (e) { f.err = e.message; render(); }
   },
   dlgStatus(id, status) {
     const a = animal(id);
     modal(`<h3>Mark ${h(a.tag)} as ${status}?</h3><div class="small muted">It stays in the system but is no longer counted in totals.</div>
       <label class="lbl">Date</label><input id="dd" type="date" value="${today()}">
+      <label class="check" style="margin-top:8px"><input type="checkbox" id="dp"> Written on paper earlier — entered now</label>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn ${status === 'dead' ? 'warn' : 'pri'}" onclick="App.doStatus('${id}','${status}')">Mark ${status}</button></div>`);
   },
-  doStatus(id, status) { const a = animal(id); try { Act.setStatus(a, status, $('#dd').value || today()); close(); toast(`${a.tag} marked ${status}`); render(); } catch (e) { close(); toast(e.message, 'err'); } },
+  doStatus(id, status) { const a = animal(id); try { Act.setStatus(a, status, $('#dd').value || today(), $('#dp').checked); close(); toast(`${a.tag} marked ${status}`); render(); } catch (e) { close(); toast(e.message, 'err'); } },
   dlgBirth(id) {
     const a = animal(id);
     modal(`<h3>${h(a.tag)} gave birth?</h3><div class="small muted">The heifer becomes a cow.</div><label class="lbl">Date</label><input id="dd" type="date" value="${today()}">
@@ -817,12 +1343,24 @@ const api = {
   doOx(id) { const a = animal(id); try { Act.toOx(a); close(); toast(`${a.tag} is now an ox`); render(); } catch (e) { close(); toast(e.message, 'err'); } },
   dlgEdit(id) {
     const a = animal(id);
-    modal(`<h3>Edit ${h(a.tag)}</h3><label class="lbl">Owner</label><select id="eo">${S.owners.map((o) => `<option value="${o.id}" ${o.id === a.ownerId ? 'selected' : ''}>${h(o.name)} (${o.colour})</option>`).join('')}</select>
+    modal(`<h3>Edit ${h(a.tag)}</h3><label class="lbl">Owner</label>${ownerSelect('eo', a.ownerId)}
+      <label class="lbl">Breed</label>${breedSelect('eb', a.breed, "document.getElementById('ebnew').style.display=this.value==='__add'?'flex':'none'")}
+      <div class="inrow" id="ebnew" style="display:none;margin-top:8px"><input id="ebname" placeholder="Name of the new breed"></div>
+      <label class="lbl">Colour of the ear tag</label><select id="ec">${Object.keys(COLOURS).map((c) => `<option value="${c}" ${a.tagColour === c ? 'selected' : ''}>${cap(c)}</option>`).join('')}</select>
       <label class="lbl">Description <span class="opt">(optional)</span></label><textarea id="ed">${h(a.description)}</textarea>
-      <div class="hint">The ear tag number cannot be changed — it is the animal's ID.</div>
+      <div class="hint">The ear tag number cannot be changed — it is the animal's ID. Every change is kept in the audit log (before → after).</div><div id="eerr"></div>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doEdit('${id}')">Save</button></div>`);
   },
-  doEdit(id) { const a = animal(id); Act.edit(a, { ownerId: $('#eo').value, description: $('#ed').value.trim() }); close(); toast('Saved'); render(); },
+  doEdit(id) {
+    const a = animal(id);
+    try {
+      let breed = $('#eb').value;
+      if (breed === '__add') breed = Act.addBreed($('#ebname').value);
+      rule('POL-03', { ownerId: $('#eo').value, breed, gender: a.gender, category: a.category });
+      const n = Act.edit(a, { ownerId: $('#eo').value, breed, tagColour: $('#ec').value, description: $('#ed').value.trim() });
+      close(); toast(n ? 'Saved' : 'No changes'); render();
+    } catch (e) { $('#eerr').innerHTML = `<div class="err">${h(e.message)}</div>`; }
+  },
   dlgNote(id) {
     const a = animal(id);
     modal(`<h3>Note for ${h(a.tag)}</h3><div class="small muted">What happened?</div><textarea id="nt" placeholder="e.g. limping, moved to another camp"></textarea>
@@ -841,79 +1379,169 @@ const api = {
     catch (e) { $('#crerr').innerHTML = `<div class="err">${h(e.message)}</div>`; }
   },
   dlgOwner(id) {
-    const o = S.owners.find((x) => x.id === id) || { name: '', colour: 'blue', phone: '', notes: '' };
-    modal(`<h3>${id ? 'Edit owner' : 'Add owner'}</h3><label class="lbl">Name</label><input id="on" value="${h(o.name)}">
-      <label class="lbl">Ear tag colour</label><select id="oc">${Object.keys(COLOURS).map((c) => `<option value="${c}" ${o.colour === c ? 'selected' : ''}>${cap(c)}</option>`).join('')}</select>
-      <label class="lbl">Phone <span class="opt">(optional)</span></label><input id="op" value="${h(o.phone)}" inputmode="tel">
-      <label class="lbl">Notes <span class="opt">(optional)</span></label><textarea id="ono">${h(o.notes)}</textarea><div id="oerr"></div>
+    const o = owner(id) || { name: '', colour: 'blue', phone: '', notes: '' };
+    modal(`<h3>${id ? 'Edit profile' : 'Add owner'}</h3><label class="lbl">Name</label><input id="on" value="${h(o.name)}">
+      <label class="lbl">Usual ear tag colour</label><select id="oc">${Object.keys(COLOURS).map((c) => `<option value="${c}" ${o.colour === c ? 'selected' : ''}>${cap(c)}</option>`).join('')}</select>
+      <label class="lbl">Phone <span class="opt">(optional)</span></label><input id="op" value="${h(o.phone)}" inputmode="tel" placeholder="e.g. +264 …">
+      <label class="lbl">Notes <span class="opt">(optional)</span></label><textarea id="ono">${h(o.notes)}</textarea>
+      <div class="hint">The picture is added by tapping the camera on the profile.</div><div id="oerr"></div>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doOwner('${id}')">Save</button></div>`);
   },
   doOwner(id) {
-    try { Act.saveOwner(id, { name: $('#on').value.trim(), colour: $('#oc').value, phone: $('#op').value.trim(), notes: $('#ono').value.trim() }); close(); toast('Owner saved'); render(); }
+    try { const o = Act.saveOwner(id, { name: $('#on').value.trim(), colour: $('#oc').value, phone: $('#op').value.trim(), notes: $('#ono').value.trim() }); close(); toast('Saved'); if (!id) go(`#/owner/${o.id}`); else render(); }
     catch (e) { $('#oerr').innerHTML = `<div class="err">${h(e.message)}</div>`; }
   },
+  dlgPhoto(id) {
+    const o = owner(id);
+    modal(`<h3>Picture of ${h(o.name)}</h3><div style="display:flex;justify-content:center;margin:14px 0">${avatar(o, 112)}</div>
+      <div class="btnrow"><label class="btn">${icon('camera')} Take a photo<input type="file" accept="image/*" capture="user" hidden onchange="App.photoFile('${id}',this)"></label>
+        <label class="btn">Choose from photos<input type="file" accept="image/*" hidden onchange="App.photoFile('${id}',this)"></label></div>
+      ${o.photo ? `<button class="btn warn block" style="margin-top:8px" onclick="App.setPhoto('${id}','')">Remove the picture</button>` : ''}
+      <div class="hint">Up to 5 MB. It is made smaller and kept on the device, so it loads once.</div><div id="pherr"></div>
+      <div class="btnrow" style="margin-top:14px"><button class="btn" onclick="App.close()">Close</button></div>`);
+  },
+  photoFile(id, input) {
+    const file = input.files && input.files[0]; if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { $('#pherr').innerHTML = `<div class="err">This picture is ${(file.size / 1048576).toFixed(1)} MB — the limit is 5 MB.</div>`; return; }
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const side = 320; const c = document.createElement('canvas'); c.width = c.height = side;
+      const k = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - k) / 2, (img.height - k) / 2, k, k, 0, 0, side, side);
+      URL.revokeObjectURL(url); api.setPhoto(id, c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); $('#pherr').innerHTML = '<div class="err">This file is not a picture.</div>'; };
+    img.src = url;
+  },
+  setPhoto(id, data) { Act.setPhoto(owner(id), data); close(); toast(data ? 'Picture saved' : 'Picture removed'); render(); },
   cf(key, val) { UI.cf[key] = val; render(); },
   cfSearch(v) { UI.cf.q = v; $('#clist').innerHTML = cattleList(); },
   of(key, val) { UI.of[key] = val; render(); },
   ofSearch(v) { UI.of.q = v; $('#olist').innerHTML = ownerList(); },
+  vn(field, val) { UI.vn[field] = val; },
+  vnMode(m) { UI.vn.mode = m; render(); },
+  vnToggle(kind, v) { const s = UI.vn[kind]; s.has(v) ? s.delete(v) : s.add(v); render(); },
   startSession() {
-    try { const s = Act.startSession({ date: $('#vd').value, vaccine: $('#vv').value, dose: $('#vdo').value, reason: $('#vr').value }); toast('Session started — scan the first animal'); go(`#/vacc/${s.id}`); }
-    catch (e) { $('#verr').innerHTML = `<div class="err">${h(e.message)}</div>`; }
+    const v = UI.vn;
+    let group = null;
+    if (v.mode === 'group') {
+      if (!v.owners.size || !v.cats.size) { v.err = 'Choose at least one owner and one category'; render(); return; }
+      group = { owners: v.owners.size === S.owners.length ? null : [...v.owners], cats: v.cats.size === CATS.length ? null : [...v.cats] };
+      if (!group.owners && !group.cats) group = null;
+    }
+    try { const s = Act.startSession({ date: v.date, vaccine: v.vaccine, dose: v.dose, reason: v.reason, group }); UI.vn = null; toast('Session started — scan the first animal'); go(`#/vacc/${s.id}`); }
+    catch (e) { v.err = e.message; render(); }
   },
   dlgEndSession(id) {
-    const s = S.sessions.find((x) => x.id === id);
-    modal(`<h3>End the session?</h3><div class="small muted">${h(s.vaccine)} — ${sessionCount(s)} vaccinated.</div>
+    const s = session(id); const p = progress(s);
+    modal(`<h3>End the session?</h3><div class="small muted">${h(s.vaccine)} — ${p.done} of ${p.total} vaccinated; ${p.total - p.done} not done.</div>
+      <div class="hint">Cattle written on paper can still be added after the session ends.</div>
       <div class="btnrow" style="margin-top:16px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" onclick="App.doEndSession('${id}')">End session</button></div>`);
   },
-  doEndSession(id) { Act.endSession(S.sessions.find((x) => x.id === id)); close(); UI.result = null; toast('Session ended'); render(); },
+  doEndSession(id) { Act.endSession(session(id)); close(); UI.result = null; toast('Session ended'); render(); },
+  toggleMissing() { UI.missOpen = !UI.missOpen; render(); },
+  printMissing(id) { const s = session(id); const p = progress(s); printTable(`${S.farm.name} — not vaccinated yet`, `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not vaccinated · printed ${fmtDT(nowIso())}`, missingRows(s)); },
+  exportMissing(id, fmt) {
+    const s = session(id); const p = progress(s); const rows = missingRows(s);
+    const base = `Dushe_Not_vaccinated_${s.vaccine.replace(/[^\w]+/g, '_')}_${today()}`;
+    if (fmt === 'pdf') download(PdfLite.table({ title: `${S.farm.name} — not vaccinated yet`, subtitle: `${s.vaccine} · started ${s.date} · ${groupLabel(s)} · ${p.missing.length} of ${p.total} not vaccinated · ${fmtDT(nowIso())}`, columns: rows[0], rows: rows.slice(1), footer: S.farm.name }), base + '.pdf', 'application/pdf');
+    else download(XlsxLite.workbook([
+      { name: 'Not vaccinated', rows, widths: [5, 14, 16, 11, 14, 10, 8], filter: true },
+      { name: 'Session', rows: [['Item', 'Value'], ['Farm', S.farm.name], ['Vaccine / medicine', s.vaccine], ['Started', s.date], ['In this session', groupLabel(s)], ['Vaccinated', `${p.done} of ${p.total}`], ['Not vaccinated', p.missing.length], ['Exported', fmtDT(nowIso())]], widths: [20, 50] },
+    ]), base + '.xlsx', XLSX);
+    log('export', `Not vaccinated — ${s.vaccine}: ${p.missing.length} cattle (${fmt === 'pdf' ? 'PDF' : 'Excel'})`, false);
+    toast(`${fmt === 'pdf' ? 'PDF' : 'Excel'} file saved — ${p.missing.length} cattle`);
+  },
+  paperField(k, v) { UI.paper[k] = v; },
+  paperCheck() { const P = UI.paper; P.text = $('#ptext').value; P.date = $('#pdate').value; P.checked = true; P.checkedText = P.text; P.err = ''; render(); },
+  paperSave() {
+    const P = UI.paper; const s = session(P.sid);
+    if (P.text !== P.checkedText) { P.checkedText = P.text; render(); toast('The numbers changed — checked again', 'warn'); return; }
+    const list = paperCheck(s, parseTags(P.checkedText)).filter((r) => r.kind === 'ok').map((r) => r.a);
+    try { const n = Act.addPaper(s, list, P.date); UI.paper = null; toast(`${n} added from paper notes`); go(`#/vacc/${s.id}`); }
+    catch (e) { P.err = e.message; render(); }
+  },
+  paperRegister(tag) {
+    const P = UI.paper;
+    UI.nf = blankNf({ key: tag + '|', tag, fixedTag: true, paper: true, date: P.date || today(), returnTo: `#/vacc/${P.sid}/paper` });
+    go(`#/new/${tag}`);
+  },
   exToggle(kind, v) { const s = UI.ex[kind]; s.has(v) ? s.delete(v) : s.add(v); render(); },
-  exAll(kind, on) { UI.ex[kind] = new Set(on ? (kind === 'owners' ? S.owners.map((o) => o.id) : CATS) : []); render(); },
+  exBreed(i) { const b = S.breeds[i]; const x = UI.ex.xb; x.has(b) ? x.delete(b) : x.add(b); render(); },
+  exAll(kind, on) { if (kind === 'breeds') UI.ex.xb = new Set(on ? [] : S.breeds); else UI.ex[kind] = new Set(on ? (kind === 'owners' ? S.owners.map((o) => o.id) : CATS) : []); render(); },
   exInc(v) { UI.ex.inc = v; render(); },
+  exFmt(k) { S.exportFmt = k; save(); render(); },
+  colToggle(k) { const c = S.exportCols.find((x) => x.k === k); c.on = !c.on; save(); render(); },
+  colMove(k, d) { const a = S.exportCols; const i = a.findIndex((x) => x.k === k); const j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; save(); render(); },
+  colsReset() { S.exportCols = defaultCols(); save(); render(); },
   doExport() {
-    const { bytes, name, count, who } = api._buildExport();
-    download(bytes, name, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    log('export', `${count} cattle — owners: ${who}`, false);
-    toast(`Excel file saved — ${count} cattle`); render();
+    const x = api._buildExport(S.exportFmt || 'xlsx');
+    download(x.bytes, x.name, x.type);
+    log('export', `${x.count} cattle as ${FORMATS[x.fmt][0]} — owners: ${x.who}; columns: ${x.cols}`, false);
+    toast(`${FORMATS[x.fmt][0]} file saved — ${x.count} cattle`); render();
   },
-  _buildExport() {
-    if (!UI.ex) UI.ex = { owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), inc: false };
-    const e = UI.ex; const list = exportList();
+  printExport() {
+    const e = UI.ex; const list = exportList(); const owners = S.owners.filter((o) => e.owners.has(o.id));
+    printTable(`${S.farm.name} — cattle list`, `${list.length} cattle · owners: ${owners.map((o) => o.name).join(', ')} · ${e.inc ? 'includes sold and dead' : 'active only'} · printed ${fmtDT(nowIso())}`, exportRows(list));
+  },
+  _buildExport(fmt) {
+    if (!UI.ex) UI.ex = { owners: new Set(S.owners.map((o) => o.id)), cats: new Set(CATS), xb: new Set(), inc: false };
+    const e = UI.ex; const list = exportList(); const rows = exportRows(list);
     const owners = S.owners.filter((o) => e.owners.has(o.id));
-    const cattle = [['Ear tag', 'Owner', 'Tag colour', 'Gender', 'Category', 'Status', 'Status date', 'Description', 'Registered on'],
-      ...list.map((a) => { const o = ownerOf(a); return [a.tag, o.name, cap(o.colour), cap(a.gender), CAT[a.category], cap(a.status), a.statusDate || '', a.description || '', a.createdAt.slice(0, 10)]; })];
-    const summary = [['Owner', 'Tag colour', 'Cows', 'Heifers', 'Bulls', 'Oxen', 'Total (active)']];
-    const all = { cow: 0, heifer: 0, bull: 0, ox: 0, all: 0 };
-    for (const o of owners) {
-      const t = totals(S.animals.filter((a) => a.ownerId === o.id && e.cats.has(a.category)));
-      summary.push([o.name, cap(o.colour), t.cow, t.heifer, t.bull, t.ox, t.all]);
-      for (const k in all) all[k] += t[k];
-    }
-    summary.push(['Total', '', all.cow, all.heifer, all.bull, all.ox, all.all]);
-    const filters = [['Item', 'Value'], ['Farm', S.farm.name], ['Farm number', S.farm.number || ''], ['Exported', fmtDT(nowIso())],
-      ['Owners', owners.map((o) => o.name).join(', ')], ['Categories', CATS.filter((c) => e.cats.has(c)).map((c) => CATS_PL[c]).join(', ')],
-      ['Include sold and dead', e.inc ? 'Yes' : 'No'], ['Number of cattle', list.length]];
-    const bytes = XlsxLite.workbook([
-      { name: 'Cattle', rows: cattle, widths: [14, 16, 11, 9, 10, 9, 12, 26, 14], filter: true },
-      { name: 'Summary', rows: summary, widths: [18, 11, 8, 9, 8, 8, 14] },
-      { name: 'Filters', rows: filters, widths: [22, 50] },
-    ]);
     const who = owners.length === S.owners.length ? 'All' : owners.length === 1 ? owners[0].name.replace(/[^\w-]+/g, '') : 'Selected';
-    return { bytes, name: `Dushe_Cattle_${who}_${today()}.xlsx`, count: list.length, who: who === 'Selected' ? owners.map((o) => o.name).join(', ') : who };
+    const stamp = fmtDT(nowIso());
+    let bytes, type;
+    if (fmt === 'csv') { bytes = csv(rows); type = 'text/csv;charset=utf-8'; }
+    else if (fmt === 'pdf') {
+      bytes = PdfLite.table({ title: `${S.farm.name} — cattle list`, subtitle: `${list.length} cattle · owners: ${who === 'All' ? 'all' : owners.map((o) => o.name).join(', ')} · ${e.inc ? 'includes sold and dead' : 'active only'} · exported ${stamp}`,
+        columns: rows[0], rows: rows.slice(1), landscape: rows[0].length > 5, footer: S.farm.name });
+      type = 'application/pdf';
+    } else {
+      const summary = [['Owner', 'Tag colour', 'Cows', 'Heifers', 'Bulls', 'Oxen', 'Total (active)']];
+      const all = { cow: 0, heifer: 0, bull: 0, ox: 0, all: 0 };
+      for (const o of owners) { const t = totals(list.filter((a) => a.ownerId === o.id)); summary.push([o.name, cap(o.colour), t.cow, t.heifer, t.bull, t.ox, t.all]); for (const k in all) all[k] += t[k]; }
+      summary.push(['Total', '', all.cow, all.heifer, all.bull, all.ox, all.all]);
+      const breeds = [['Breed', 'Cows', 'Heifers', 'Bulls', 'Oxen', 'Total (active)'], ...S.breeds.filter((b) => !e.xb.has(b)).map((b) => { const t = totals(list.filter((a) => a.breed === b)); return [b, t.cow, t.heifer, t.bull, t.ox, t.all]; })];
+      const filters = [['Item', 'Value'], ['Farm', S.farm.name], ['Farm number', S.farm.number || ''], ['Exported', stamp], ['Owners', owners.map((o) => o.name).join(', ')],
+        ['Categories', CATS.filter((c) => e.cats.has(c)).map((c) => CATS_PL[c]).join(', ')], ['Breeds', S.breeds.filter((b) => !e.xb.has(b)).join(', ')],
+        ['Include sold and dead', e.inc ? 'Yes' : 'No'], ['Columns', rows[0].join(', ')], ['Number of cattle', list.length]];
+      bytes = XlsxLite.workbook([
+        { name: 'Cattle', rows, widths: colWidths(rows), filter: true },
+        { name: 'Summary', rows: summary, widths: [18, 11, 8, 9, 8, 8, 14] },
+        { name: 'Breeds', rows: breeds, widths: [16, 8, 9, 8, 8, 14] },
+        { name: 'Filters', rows: filters, widths: [22, 60] },
+      ]);
+      type = XLSX;
+    }
+    return { bytes, type, fmt, name: `Dushe_Cattle_${who}_${today()}.${fmt}`, count: list.length, who: who === 'Selected' ? owners.map((o) => o.name).join(', ') : who, cols: rows[0].join(', ') };
   },
+  dlgBackup(k) {
+    const [l, , steps] = BACKUP_WAYS[k];
+    const blocked = k === 'bt' && S.device === 'iPhone';
+    modal(`<h3>${h(l)}</h3><ol class="steps">${steps.map((x) => `<li>${h(x)}</li>`).join('')}</ol>
+      ${blocked ? '<div class="warnbox">An iPhone cannot send files to Windows over Bluetooth — use Wi-Fi or a USB drive.</div>' : ''}
+      <div class="btnrow" style="margin-top:14px"><button class="btn" onclick="App.close()">Cancel</button><button class="btn pri" ${blocked ? 'disabled' : ''} onclick="App.backup('${k}')">Back up now (pretend)</button></div>`);
+  },
+  backup(k) { Act.backup(k); close(); toast(`Backed up — ${BACKUP_WAYS[k][0]} (pretend)`); render(); },
   setOnline(v) { S.online = v; save(); render(); },
-  backup() { Act.backup(); toast('Backed up to the farm laptop (pretend)'); render(); },
   saveBackupFile() { download(JSON.stringify(S, null, 1), `Dushe_backup_${today()}.json`, 'application/json'); toast('Backup file saved'); },
   sync() { try { const n = Act.sync(); toast(`Synced — ${n} changes sent (pretend)`); } catch (e) { toast(e.message, 'err'); } render(); },
   saveFarm() { Act.saveFarm({ name: $('#fn').value, number: $('#fnum').value, device: $('#fdev').value }); toast('Farm details saved'); render(); },
-  reset() { if (!confirm('Reset all sample data?')) return; try { localStorage.removeItem(KEY); } catch (e) {} S = seed(); save(); UI.ex = null; UI.nf = null; UI.of = { id: null, cat: 'all', q: '', inactive: false }; toast('Sample data reset'); go('#/home'); },
+  addBreed() { try { const b = Act.addBreed($('#nbreed').value); toast(`Breed added — ${b}`); render(); } catch (e) { $('#berr').innerHTML = `<div class="err">${h(e.message)}</div>`; } },
+  reset() {
+    if (!confirm('Reset all sample data?')) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    S = seed(); save(); UI.ex = null; UI.nf = null; UI.vn = null; UI.paper = null; UI.missOpen = false; UI.of = { id: null, tab: 'cattle', cat: 'all', q: '', inactive: false };
+    toast('Sample data reset'); go('#/home');
+  },
   // for screenshots and testing
-  _state: () => S, _act: Act, _render: render,
+  _state: () => S, _ui: () => UI, _act: Act, _render: render, _progress: (id) => progress(session(id)),
 };
 
 // ---------- start ----------
 load();
-try { VIEW = new URLSearchParams(location.search).get('view') || localStorage.getItem(KEY + '-view') || 'phone'; } catch (e) { VIEW = 'phone'; }
-window.addEventListener('hashchange', () => { UI.read = null; if (!location.hash.startsWith('#/scan')) UI.result = null; render(); });
+try { const v = new URLSearchParams(location.search).get('view') || localStorage.getItem(KEY + '-view'); VIEW = ['phone', 'tablet', 'desktop'].includes(v) ? v : 'phone'; } catch (e) { VIEW = 'phone'; }
+window.addEventListener('hashchange', () => { UI.read = null; if (!/^#\/(scan|vacc\/)/.test(location.hash)) UI.result = null; render(); });
 render();
 return api;
 })();
